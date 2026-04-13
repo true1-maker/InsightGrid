@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>লগইন – BlogNest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-card">
+
+    <a href="index.html" class="auth-logo">✍️ BlogNest</a>
+    <h1 class="auth-title">স্বাগতম!</h1>
+    <p class="auth-sub">আপনার অ্যাকাউন্টে প্রবেশ করুন</p>
+
+    <!-- Error box -->
+    <div class="auth-error" id="error-box"></div>
+
+    <!-- Form -->
+    <div class="form-group">
+      <label class="form-label" for="email">ইমেইল ঠিকানা</label>
+      <input class="form-input" type="email" id="email"
+        placeholder="example@email.com" autocomplete="email">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="password">পাসওয়ার্ড</label>
+      <input class="form-input" type="password" id="password"
+        placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn btn-primary btn-full" id="login-btn" onclick="handleLogin()">
+      লগইন করুন
+    </button>
+
+    <div class="auth-footer" style="margin-top:1rem">
+      অ্যাকাউন্ট নেই? <a href="register.html">রেজিস্ট্রেশন করুন</a>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+
+<script>
+  // ── Redirect if already logged in ─────────
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      const redirect = getQueryParam('redirect');
+      window.location.href = redirect || 'index.html';
+    }
+  });
+
+  const emailEl  = document.getElementById('email');
+  const passEl   = document.getElementById('password');
+  const loginBtn = document.getElementById('login-btn');
+  const errorBox = document.getElementById('error-box');
+
+  // Allow Enter key to submit
+  [emailEl, passEl].forEach(el =>
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); })
+  );
+
+  // ── Login Handler ──────────────────────────
+  async function handleLogin() {
+    hideError();
+
+    const email    = emailEl.value.trim();
+    const password = passEl.value;
+
+    if (!email)    return showError('ইমেইল দিন');
+    if (!password) return showError('পাসওয়ার্ড দিন');
+
+    setLoading(true);
+
+    try {
+      await loginUser(email, password);
+      showToast('লগইন সফল হয়েছে ✓');
+      const redirect = getQueryParam('redirect');
+      setTimeout(() => window.location.href = redirect || 'index.html', 700);
+    } catch (err) {
+      setLoading(false);
+      showError(firebaseErrorMessage(err.code));
+    }
+  }
+
+  function showError(msg) {
+    errorBox.textContent   = msg;
+    errorBox.style.display = 'block';
+  }
+  function hideError() {
+    errorBox.style.display = 'none';
+  }
+  function setLoading(on) {
+    loginBtn.disabled    = on;
+    loginBtn.textContent = on ? 'লগইন হচ্ছে...' : 'লগইন করুন';
+  }
+</script>
+</body>
+</html>
