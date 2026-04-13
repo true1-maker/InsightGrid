@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>রেজিস্ট্রেশন – BlogNest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-card">
+
+    <a href="index.html" class="auth-logo">✍️ BlogNest</a>
+    <h1 class="auth-title">অ্যাকাউন্ট তৈরি করুন</h1>
+    <p class="auth-sub">বিনামূল্যে যোগ দিন এবং লেখালেখি শুরু করুন</p>
+
+    <!-- Error box -->
+    <div class="auth-error" id="error-box"></div>
+
+    <!-- Form -->
+    <div class="form-group">
+      <label class="form-label" for="name">আপনার নাম</label>
+      <input class="form-input" type="text" id="name"
+        placeholder="মো. রাহিম উদ্দিন" autocomplete="name">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="email">ইমেইল ঠিকানা</label>
+      <input class="form-input" type="email" id="email"
+        placeholder="example@email.com" autocomplete="email">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="password">পাসওয়ার্ড</label>
+      <input class="form-input" type="password" id="password"
+        placeholder="কমপক্ষে ৬টি অক্ষর" autocomplete="new-password">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="confirm">পাসওয়ার্ড নিশ্চিত করুন</label>
+      <input class="form-input" type="password" id="confirm"
+        placeholder="পাসওয়ার্ড আবার লিখুন" autocomplete="new-password">
+    </div>
+
+    <button class="btn btn-primary btn-full" id="reg-btn" onclick="handleRegister()">
+      রেজিস্ট্রেশন করুন
+    </button>
+
+    <div class="auth-footer" style="margin-top:1rem">
+      ইতিমধ্যে অ্যাকাউন্ট আছে? <a href="login.html">লগইন করুন</a>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+
+<script>
+  // ── Redirect if already logged in ─────────
+  auth.onAuthStateChanged(user => {
+    if (user) window.location.href = 'index.html';
+  });
+
+  const nameEl    = document.getElementById('name');
+  const emailEl   = document.getElementById('email');
+  const passEl    = document.getElementById('password');
+  const confirmEl = document.getElementById('confirm');
+  const regBtn    = document.getElementById('reg-btn');
+  const errorBox  = document.getElementById('error-box');
+
+  // Allow Enter key to submit
+  document.querySelectorAll('.form-input').forEach(el =>
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') handleRegister(); })
+  );
+
+  // ── Register Handler ───────────────────────
+  async function handleRegister() {
+    hideError();
+
+    const name     = nameEl.value.trim();
+    const email    = emailEl.value.trim();
+    const password = passEl.value;
+    const confirm  = confirmEl.value;
+
+    // Validation
+    if (!name)               return showError('আপনার নাম লিখুন');
+    if (name.length < 2)     return showError('নাম কমপক্ষে ২ অক্ষর হতে হবে');
+    if (!email)              return showError('ইমেইল ঠিকানা দিন');
+    if (!email.includes('@')) return showError('সঠিক ইমেইল ঠিকানা দিন');
+    if (password.length < 6) return showError('পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে');
+    if (password !== confirm) return showError('পাসওয়ার্ড দুটো মিলছে না');
+
+    setLoading(true);
+
+    try {
+      await registerUser(email, password, name);
+      showToast('অ্যাকাউন্ট তৈরি হয়েছে! স্বাগতম 🎉');
+      setTimeout(() => window.location.href = 'index.html', 900);
+    } catch (err) {
+      setLoading(false);
+      showError(firebaseErrorMessage(err.code));
+    }
+  }
+
+  function showError(msg) {
+    errorBox.textContent   = msg;
+    errorBox.style.display = 'block';
+  }
+  function hideError() {
+    errorBox.style.display = 'none';
+  }
+  function setLoading(on) {
+    regBtn.disabled    = on;
+    regBtn.textContent = on ? 'তৈরি হচ্ছে...' : 'রেজিস্ট্রেশন করুন';
+  }
+</script>
+</body>
+</html>
