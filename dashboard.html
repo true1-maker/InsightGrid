@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ড্যাশবোর্ড – BlogNest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ════════════════ NAVBAR ════════════════ -->
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-brand">✍️ BlogNest</a>
+    <div class="nav-actions">
+      <a href="write.html" class="btn btn-primary btn-sm" id="nav-write-btn" style="display:none">✏️ নতুন পোস্ট</a>
+      <a href="login.html" class="btn btn-primary btn-sm" id="nav-login-btn">লগইন</a>
+
+      <div class="dropdown" id="nav-user-menu" style="display:none">
+        <div class="nav-avatar" onclick="toggleDropdown('user-dd')">
+          <img id="nav-avatar" src="" alt="" style="display:none">
+          <span id="nav-initials"></span>
+        </div>
+        <div class="dropdown-menu" id="user-dd">
+          <a href="write.html">✏️ নতুন পোস্ট</a>
+          <a href="profile.html">👤 প্রোফাইল</a>
+          <div class="dropdown-divider"></div>
+          <button onclick="handleLogout()">🚪 লগআউট</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════ DASHBOARD BODY ════════════════ -->
+<div class="container dash-page">
+
+  <!-- Page header -->
+  <h1 class="page-title" id="dash-title">ড্যাশবোর্ড</h1>
+  <p class="page-sub" id="dash-sub">আপনার সকল পোস্ট ও পরিসংখ্যান</p>
+
+  <!-- Stats row -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num" id="s-total">–</div>
+      <div class="stat-label">মোট আর্টিকেল</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="s-pub">–</div>
+      <div class="stat-label">প্রকাশিত</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="s-draft">–</div>
+      <div class="stat-label">ড্রাফট</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="s-views">–</div>
+      <div class="stat-label">মোট ভিউ</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="s-likes">–</div>
+      <div class="stat-label">মোট লাইক</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="s-comments">–</div>
+      <div class="stat-label">মোট মন্তব্য</div>
+    </div>
+  </div>
+
+  <!-- Articles table -->
+  <div class="section-row">
+    <h2 class="section-heading">আমার লেখাসমূহ</h2>
+    <a href="write.html" class="btn btn-primary btn-sm">+ নতুন লিখুন</a>
+  </div>
+
+  <div id="articles-area">
+    <div class="loading"><div class="spinner"></div><span>লোড হচ্ছে...</span></div>
+  </div>
+
+</div>
+
+<!-- ════════════════ FOOTER ════════════════ -->
+<footer class="footer" style="margin-top:4rem">
+  <div class="container">
+    <div class="footer-bottom">© 2024 BlogNest – সর্বস্বত্ব সংরক্ষিত</div>
+  </div>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/articles.js"></script>
+
+<script>
+  requireAuth();
+
+  initAuth(async (user, profile) => {
+    document.getElementById('dash-title').textContent =
+      `স্বাগতম, ${user.displayName?.split(' ')[0] || 'লেখক'}! 👋`;
+
+    await loadDashboard(user.uid);
+  });
+
+  // ── Load all data ──────────────────────────
+  async function loadDashboard(uid) {
+    try {
+      const articles = await getUserArticles(uid);
+      populateStats(articles);
+      renderTable(articles);
+    } catch (err) {
+      document.getElementById('articles-area').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">⚠️</div>
+          <h3>লোড ব্যর্থ হয়েছে</h3>
+          <p>${err.message}</p>
+        </div>`;
+    }
+  }
+
+  // ── Stats ──────────────────────────────────
+  function populateStats(articles) {
+    const pub      = articles.filter(a => a.status === 'published').length;
+    const draft    = articles.filter(a => a.status === 'draft').length;
+    const views    = articles.reduce((s, a) => s + (a.views || 0), 0);
+    const likes    = articles.reduce((s, a) => s + (a.likes?.length || 0), 0);
+    const comments = articles.reduce((s, a) => s + (a.commentCount || 0), 0);
+
+    document.getElementById('s-total').textContent    = articles.length;
+    document.getElementById('s-pub').textContent      = pub;
+    document.getElementById('s-draft').textContent    = draft;
+    document.getElementById('s-views').textContent    = formatNumber(views);
+    document.getElementById('s-likes').textContent    = formatNumber(likes);
+    document.getElementById('s-comments').textContent = formatNumber(comments);
+  }
+
+  // ── Table ──────────────────────────────────
+  function renderTable(articles) {
+    const area = document.getElementById('articles-area');
+
+    if (!articles.length) {
+      area.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">✍️</div>
+          <h3>এখনো কোনো লেখা নেই</h3>
+          <p>আপনার প্রথম আর্টিকেল লিখুন!</p>
+          <a href="write.html" class="btn btn-primary" style="margin-top:1.25rem">লেখা শুরু করুন</a>
+        </div>`;
+      return;
+    }
+
+    area.innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>শিরোনাম</th>
+              <th>বিষয়</th>
+              <th>অবস্থা</th>
+              <th>ভিউ</th>
+              <th>লাইক</th>
+              <th>মন্তব্য</th>
+              <th>তারিখ</th>
+              <th>অ্যাকশন</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${articles.map(makeRow).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  function makeRow(a) {
+    const statusBadge = a.status === 'published'
+      ? `<span class="badge badge-pub">প্রকাশিত</span>`
+      : `<span class="badge badge-draft">ড্রাফট</span>`;
+
+    const viewBtn = a.status === 'published'
+      ? `<button class="icon-btn" title="দেখুন"
+           onclick="navigateTo('article.html',{slug:'${a.slug}'})">👁</button>`
+      : '';
+
+    return `
+      <tr id="row-${a.id}">
+        <td class="td-title"><span title="${a.title}">${a.title}</span></td>
+        <td>${a.category || '–'}</td>
+        <td>${statusBadge}</td>
+        <td>${formatNumber(a.views || 0)}</td>
+        <td>${(a.likes || []).length}</td>
+        <td>${a.commentCount || 0}</td>
+        <td>${formatDate(a.createdAt)}</td>
+        <td>
+          <div class="tbl-actions">
+            ${viewBtn}
+            <button class="icon-btn" title="সম্পাদনা"
+              onclick="navigateTo('write.html',{id:'${a.id}'})">✏️</button>
+            <button class="icon-btn del" title="মুছুন"
+              onclick="handleDelete('${a.id}')">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+  }
+
+  // ── Delete ─────────────────────────────────
+  async function handleDelete(id) {
+    if (!confirm('এই আর্টিকেল মুছে ফেলবেন?\nএটি পুনরুদ্ধার করা যাবে না।')) return;
+    try {
+      await deleteArticle(id);
+      document.getElementById(`row-${id}`)?.remove();
+      showToast('আর্টিকেল মুছে ফেলা হয়েছে ✓');
+
+      // Reload stats
+      const uid = auth.currentUser?.uid;
+      if (uid) {
+        const updated = await getUserArticles(uid);
+        populateStats(updated);
+        if (!updated.length) renderTable(updated);
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+</script>
+</body>
+</html>
