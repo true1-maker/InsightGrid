@@ -21,6 +21,9 @@ const db   = firebase.firestore();
 // ── Firestore Settings ───────────────────────────────────────
 db.settings({ ignoreUndefinedProperties: true });
 
+// ── Admin ───────────────────────────────────────────────────
+const ADMIN_UID = "4zxg2gIs75UpghRuB1Ttil04BSj2";
+
 // ── Cloudinary Config (used for all image uploads) ───────────
 const CLOUDINARY_CLOUD_NAME   = "dmqatg7jk";
 const CLOUDINARY_UPLOAD_PRESET = "blog_upload";
