@@ -34,6 +34,32 @@ async function loginUser(email, password) {
   return cred.user;
 }
 
+
+// ── Google Sign-In ───────────────────────────────────────────
+async function loginWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  const cred     = await auth.signInWithPopup(provider);
+  const user     = cred.user;
+
+  // Create Firestore profile only on first Google login
+  const existing = await db.collection('users').doc(user.uid).get();
+  if (!existing.exists) {
+    await db.collection('users').doc(user.uid).set({
+      uid:          user.uid,
+      displayName:  user.displayName || '',
+      email:        user.email,
+      photoURL:     user.photoURL || '',
+      bio:          '',
+      role:         'author',
+      articleCount: 0,
+      totalViews:   0,
+      bookmarks:    [],
+      createdAt:    firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+
+  return user;
+}
 // ── Logout ───────────────────────────────────────────────────
 async function logoutUser() {
   await auth.signOut();
@@ -43,8 +69,22 @@ async function logoutUser() {
 
 // ── Get Profile ──────────────────────────────────────────────
 async function getUserProfile(uid) {
-  const doc = await db.collection('users').doc(uid).get();
-  return doc.exists ? { id: doc.id, ...doc.data() } : null;
+  const doc     = await db.collection('users').doc(uid).get();
+  const profile = doc.exists ? { id: doc.id, ...doc.data() } : null;
+
+  // Auto-assign admin role if UID matches ADMIN_UID
+  if (profile && uid === ADMIN_UID) {
+    profile.role = 'admin';
+
+    // Also persist it to Firestore if not already set
+    if (doc.data()?.role !== 'admin') {
+      db.collection('users').doc(uid)
+        .update({ role: 'admin' })
+        .catch(() => {});
+    }
+  }
+
+  return profile;
 }
 
 // ── Update Profile ───────────────────────────────────────────
@@ -167,4 +207,4 @@ function firebaseErrorMessage(code) {
     'auth/network-request-failed': 'ইন্টারনেট সংযোগ পরীক্ষা করুন'
   };
   return map[code] || 'কিছু একটা ভুল হয়েছে, আবার চেষ্টা করুন';
-}
+        }
