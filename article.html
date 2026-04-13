@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>আর্টিকেল – BlogNest</title>
+  <meta id="meta-desc"  name="description" content="">
+  <meta id="meta-og-title"   property="og:title"       content="">
+  <meta id="meta-og-image"   property="og:image"       content="">
+  <meta id="meta-og-desc"    property="og:description" content="">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ════════════════ NAVBAR ════════════════ -->
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-brand">✍️ BlogNest</a>
+    <div class="nav-actions">
+      <a href="write.html" class="btn btn-outline btn-sm" id="nav-write-btn" style="display:none">✏️ লিখুন</a>
+      <a href="login.html" class="btn btn-primary btn-sm" id="nav-login-btn">লগইন</a>
+
+      <div class="dropdown" id="nav-user-menu" style="display:none">
+        <div class="nav-avatar" onclick="toggleDropdown('user-dd')">
+          <img id="nav-avatar" src="" alt="" style="display:none">
+          <span id="nav-initials"></span>
+        </div>
+        <div class="dropdown-menu" id="user-dd">
+          <a href="dashboard.html">📊 ড্যাশবোর্ড</a>
+          <a href="write.html">✏️ নতুন পোস্ট</a>
+          <a href="profile.html">👤 প্রোফাইল</a>
+          <div class="dropdown-divider"></div>
+          <button onclick="handleLogout()">🚪 লগআউট</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════ ARTICLE AREA ════════════════ -->
+<div id="page-container">
+  <div class="loading" style="padding:5rem">
+    <div class="spinner"></div><span>লোড হচ্ছে...</span>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/articles.js"></script>
+
+<script>
+  let articleData = null;
+
+  // ── Auth init ────────────────────────────
+  initAuth(() => {
+    // Refresh engagement buttons when user logs in mid-page
+    if (articleData) refreshEngagementUI();
+  });
+
+  // ── Load article ─────────────────────────
+  (async () => {
+    const slug = getQueryParam('slug');
+
+    if (!slug) {
+      showNotFound();
+      return;
+    }
+
+    try {
+      articleData = await getArticleBySlug(slug);
+      if (!articleData) { showNotFound(); return; }
+
+      // Update page meta
+      document.title = `${articleData.title} – BlogNest`;
+      document.getElementById('meta-desc').content        = truncateText(articleData.content, 155);
+      document.getElementById('meta-og-title').content    = articleData.title;
+      document.getElementById('meta-og-desc').content     = truncateText(articleData.content, 155);
+      document.getElementById('meta-og-image').content    = articleData.thumbnail || '';
+
+      renderPage(articleData);
+      incrementViews(articleData.id);
+      loadComments(articleData.id);
+
+    } catch (err) {
+      showNotFound();
+      console.error(err);
+    }
+  })();
+
+  // ── Render full page ──────────────────────
+  function renderPage(a) {
+    document.getElementById('page-container').innerHTML = `
+      <div class="article-page fade-in">
+
+        <!-- Category badge -->
+        <span class="art-cat">${a.category}</span>
+
+        <!-- Title -->
+        <h1 class="art-title">${a.title}</h1>
+
+        <!-- Meta bar -->
+        <div class="art-meta-bar">
+          <div class="art-author">
+            <a href="profile.html?uid=${a.authorId}" class="author-av" id="art-avatar">
+              ${a.authorPhoto
+                ? `<img src="${a.authorPhoto}" alt="${a.authorName}">`
+                : getInitials(a.authorName)}
+            </a>
+            <div>
+              <div class="author-name">
+                <a href="profile.html?uid=${a.authorId}">${a.authorName}</a>
+              </div>
+              <div class="art-date">
+                ${formatDate(a.createdAt)} &nbsp;·&nbsp;
+                ⏱ ${a.readTime} মিনিটের পড়া &nbsp;·&nbsp;
+                👁 ${formatNumber(a.views)}
+              </div>
+            </div>
+          </div>
+
+          <div class="art-actions">
+            <button class="act-btn" id="like-btn" onclick="handleLike()">
+              🤍 <span id="like-count">${(a.likes || []).length}</span>
+            </button>
+            <button class="act-btn" id="bookmark-btn" onclick="handleBookmark()">🔖</button>
+            <button class="act-btn" onclick="handleShare()">🔗</button>
+            <div id="edit-btn-wrap"></div>
+          </div>
+        </div>
+
+        <!-- Thumbnail -->
+        ${a.thumbnail ? `<img src="${a.thumbnail}" alt="${a.title}" class="art-thumbnail">` : ''}
+
+        <!-- Content -->
+        <div class="art-body">${a.content}</div>
+
+        <!-- Tags -->
+        ${(a.tags || []).length ? `
+          <div class="art-tags">
+            ${a.tags.map(t => `<span class="tag">#${t}</span>`).join('')}
+          </div>` : ''}
+
+        <!-- Comments -->
+        <section class="comments-section">
+          <h2 class="comments-title" id="comments-heading">মন্তব্য</h2>
+
+          <div class="comment-form-row" id="comment-form">
+            <div class="avatar-xs" id="commenter-av">
+              <span id="commenter-init">?</span>
+            </div>
+            <div style="flex:1">
+              <textarea
+                class="comment-textarea"
+                id="comment-input"
+                placeholder="আপনার মতামত লিখুন..."
+                rows="3"></textarea>
+              <div style="text-align:right; margin-top:.5rem">
+                <button class="btn btn-primary btn-sm" onclick="submitComment()">
+                  পাঠান ↗
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="comments-list">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </section>
+
+      </div>`;
+
+    // Set engagement button states after auth loads
+    refreshEngagementUI();
+
+    // Show edit button if author
+    auth.onAuthStateChanged(user => {
+      if (user && user.uid === a.authorId) {
+        document.getElementById('edit-btn-wrap').innerHTML =
+          `<a href="write.html?id=${a.id}" class="btn btn-outline btn-sm">✏️ সম্পাদনা</a>`;
+      }
+      // Update commenter avatar
+      const init = document.getElementById('commenter-init');
+      if (init && user) init.textContent = getInitials(user.displayName || user.email);
+    });
+  }
+
+  function refreshEngagementUI() {
+    const user  = auth.currentUser;
+    const liked = user && (articleData?.likes || []).includes(user.uid);
+    const btn   = document.getElementById('like-btn');
+    if (btn) {
+      btn.className = `act-btn${liked ? ' liked' : ''}`;
+      btn.innerHTML = `${liked ? '❤️' : '🤍'} <span id="like-count">${(articleData?.likes || []).length}</span>`;
+    }
+  }
+
+  // ── Like ──────────────────────────────────
+  async function handleLike() {
+    if (!auth.currentUser) {
+      showToast('লাইক করতে লগইন করুন', 'error');
+      return;
+    }
+    const nowLiked = await toggleLike(articleData.id);
+    if (nowLiked === null) return;
+
+    const countEl = document.getElementById('like-count');
+    const btn     = document.getElementById('like-btn');
+    const cur     = parseInt(countEl?.textContent || '0');
+
+    if (nowLiked) {
+      btn.className = 'act-btn liked';
+      btn.innerHTML = `❤️ <span id="like-count">${cur + 1}</span>`;
+      articleData.likes = [...(articleData.likes || []), auth.currentUser.uid];
+    } else {
+      btn.className = 'act-btn';
+      btn.innerHTML = `🤍 <span id="like-count">${Math.max(0, cur - 1)}</span>`;
+      articleData.likes = (articleData.likes || []).filter(id => id !== auth.currentUser.uid);
+    }
+  }
+
+  // ── Bookmark ──────────────────────────────
+  async function handleBookmark() {
+    if (!auth.currentUser) {
+      showToast('বুকমার্ক করতে লগইন করুন', 'error');
+      return;
+    }
+    const saved = await toggleBookmark(articleData.id);
+    if (saved === null) return;
+    const btn = document.getElementById('bookmark-btn');
+    btn.className = saved ? 'act-btn bookmarked' : 'act-btn';
+    btn.textContent = saved ? '🔖' : '🔖';
+    showToast(saved ? 'বুকমার্কে যোগ হয়েছে ✓' : 'বুকমার্ক থেকে সরানো হয়েছে');
+  }
+
+  // ── Share ─────────────────────────────────
+  function handleShare() {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: articleData.title, url });
+    } else {
+      navigator.clipboard.writeText(url)
+        .then(() => showToast('লিংক কপি হয়েছে ✓'));
+    }
+  }
+
+  // ── Comments ──────────────────────────────
+  async function loadComments(articleId) {
+    try {
+      const comments = await getComments(articleId);
+      const heading  = document.getElementById('comments-heading');
+      if (heading) heading.textContent = `মন্তব্য (${comments.length})`;
+
+      const list = document.getElementById('comments-list');
+      if (!list) return;
+
+      if (!comments.length) {
+        list.innerHTML = `<div class="empty-state" style="padding:2rem 0">
+          <p>প্রথম মন্তব্য করুন!</p>
+        </div>`;
+        return;
+      }
+
+      const uid = auth.currentUser?.uid;
+      list.innerHTML = comments.map(c => renderComment(c, uid)).join('');
+
+    } catch (err) {
+      console.error('Comments load error:', err);
+    }
+  }
+
+  async function submitComment() {
+    const input = document.getElementById('comment-input');
+    const text  = (input?.value || '').trim();
+
+    if (!auth.currentUser) { showToast('মন্তব্য করতে লগইন করুন', 'error'); return; }
+    if (!text) { showToast('মন্তব্য লিখুন', 'error'); return; }
+
+    try {
+      const comment = await addComment(articleData.id, text);
+      input.value = '';
+
+      const list = document.getElementById('comments-list');
+      const empty = list?.querySelector('.empty-state');
+      if (empty) empty.remove();
+
+      list?.insertAdjacentHTML('beforeend', renderComment(comment, auth.currentUser.uid));
+
+      const heading = document.getElementById('comments-heading');
+      const match   = heading?.textContent.match(/\d+/);
+      const cur     = match ? parseInt(match[0]) : 0;
+      if (heading) heading.textContent = `মন্তব্য (${cur + 1})`;
+
+      showToast('মন্তব্য যোগ হয়েছে ✓');
+
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  async function removeComment(commentId) {
+    if (!confirm('এই মন্তব্য মুছে ফেলবেন?')) return;
+    try {
+      await deleteComment(commentId, articleData.id);
+      document.getElementById(`comment-${commentId}`)?.remove();
+
+      const heading = document.getElementById('comments-heading');
+      const match   = heading?.textContent.match(/\d+/);
+      const cur     = match ? parseInt(match[0]) : 1;
+      if (heading) heading.textContent = `মন্তব্য (${Math.max(0, cur - 1)})`;
+
+      showToast('মন্তব্য মুছে ফেলা হয়েছে');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  // ── 404 state ─────────────────────────────
+  function showNotFound() {
+    document.getElementById('page-container').innerHTML = `
+      <div class="empty-state" style="padding:5rem 1rem">
+        <div class="empty-icon">🔍</div>
+        <h3>আর্টিকেল পাওয়া যায়নি</h3>
+        <p>এই আর্টিকেলটি মুছে ফেলা হয়েছে বা পাওয়া যাচ্ছে না</p>
+        <a href="index.html" class="btn btn-primary" style="margin-top:1.5rem">হোমে ফিরুন</a>
+      </div>`;
+  }
+</script>
+</body>
+</html>
