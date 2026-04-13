@@ -76,11 +76,7 @@ async function deleteArticle(articleId) {
 
   await db.collection('articles').doc(articleId).delete();
 
-  // Try to remove thumbnail from storage
-  if (article.thumbnail && article.thumbnail.includes('firebasestorage')) {
-    storage.refFromURL(article.thumbnail).delete().catch(() => {});
-  }
-
+  // Note: Cloudinary images are managed from the Cloudinary dashboard
   // Decrement author's article count
   db.collection('users').doc(article.authorId)
     .update({ articleCount: firebase.firestore.FieldValue.increment(-1) })
@@ -214,24 +210,16 @@ async function toggleBookmark(articleId) {
 }
 
 // ════════════════════════════════════════════════════════════
-//  IMAGE UPLOAD
+//  IMAGE UPLOAD — via Cloudinary
 // ════════════════════════════════════════════════════════════
 async function uploadThumbnail(file) {
-  const user = auth.currentUser;
-  if (!user) throw new Error('লগইন প্রয়োজন');
-  const ext = file.name.split('.').pop().toLowerCase();
-  const ref = storage.ref(`thumbnails/${user.uid}_${Date.now()}.${ext}`);
-  await ref.put(file);
-  return await ref.getDownloadURL();
+  if (!auth.currentUser) throw new Error('লগইন প্রয়োজন');
+  return await uploadToCloudinary(file);
 }
 
 async function uploadInlineImage(file) {
-  const user = auth.currentUser;
-  if (!user) throw new Error('লগইন প্রয়োজন');
-  const ext = file.name.split('.').pop().toLowerCase();
-  const ref = storage.ref(`inline/${user.uid}_${Date.now()}.${ext}`);
-  await ref.put(file);
-  return await ref.getDownloadURL();
+  if (!auth.currentUser) throw new Error('লগইন প্রয়োজন');
+  return await uploadToCloudinary(file);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -336,4 +324,4 @@ function renderComment(c, currentUid) {
     </div>
   </div>`;
       }
-    
+      
