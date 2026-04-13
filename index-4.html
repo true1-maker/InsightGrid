@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlogNest – বাংলা ব্লগ প্ল্যাটফর্ম</title>
+  <meta name="description" content="বাংলাদেশের সেরা ব্লগিং প্ল্যাটফর্ম। লিখুন, শেয়ার করুন, শিখুন।">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ════════════════ NAVBAR ════════════════ -->
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-brand">✍️ BlogNest</a>
+
+    <div class="nav-search">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="আর্টিকেল খুঁজুন...">
+    </div>
+
+    <div class="nav-actions">
+      <a href="write.html" class="btn btn-outline btn-sm" id="nav-write-btn" style="display:none">✏️ লিখুন</a>
+      <a href="login.html" class="btn btn-primary btn-sm" id="nav-login-btn">লগইন</a>
+
+      <div class="dropdown" id="nav-user-menu" style="display:none">
+        <div class="nav-avatar" onclick="toggleDropdown('user-dd')">
+          <img id="nav-avatar" src="" alt="" style="display:none">
+          <span id="nav-initials"></span>
+        </div>
+        <div class="dropdown-menu" id="user-dd">
+          <a href="dashboard.html">📊 ড্যাশবোর্ড</a>
+          <a href="write.html">✏️ নতুন পোস্ট</a>
+          <a href="profile.html">👤 প্রোফাইল</a>
+          <div class="dropdown-divider"></div>
+          <button onclick="handleLogout()">🚪 লগআউট</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════ HERO ════════════════ -->
+<section class="hero">
+  <div class="container">
+    <h1>আপনার চিন্তা শেয়ার করুন</h1>
+    <p>বাংলাদেশের সেরা ব্লগিং প্ল্যাটফর্মে লিখুন, পড়ুন এবং শিখুন</p>
+    <a href="register.html" class="hero-cta">শুরু করুন →</a>
+  </div>
+</section>
+
+<!-- ════════════════ CATEGORY BAR ════════════════ -->
+<div class="cat-bar">
+  <div class="container">
+    <ul class="cat-list" id="cat-list">
+      <li><a href="#" class="active" data-cat="all">সব</a></li>
+      <li><a href="#" data-cat="Technology">প্রযুক্তি</a></li>
+      <li><a href="#" data-cat="Education">শিক্ষা</a></li>
+      <li><a href="#" data-cat="Business">ব্যবসা</a></li>
+      <li><a href="#" data-cat="Health">স্বাস্থ্য</a></li>
+      <li><a href="#" data-cat="Science">বিজ্ঞান</a></li>
+      <li><a href="#" data-cat="Sports">খেলাধুলা</a></li>
+      <li><a href="#" data-cat="Entertainment">বিনোদন</a></li>
+      <li><a href="#" data-cat="Travel">ভ্রমণ</a></li>
+      <li><a href="#" data-cat="Food">খাবার</a></li>
+      <li><a href="#" data-cat="Lifestyle">জীবনধারা</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ════════════════ MAIN CONTENT ════════════════ -->
+<div class="container">
+  <div class="home-layout">
+
+    <!-- Feed -->
+    <main>
+      <div id="feed-container">
+        <div class="loading"><div class="spinner"></div><span>লোড হচ্ছে...</span></div>
+      </div>
+
+      <div style="text-align:center; margin-top:1.5rem">
+        <button class="btn btn-outline" id="load-more-btn" style="display:none" onclick="loadMore()">
+          আরো দেখুন ↓
+        </button>
+      </div>
+    </main>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+      <div class="sidebar-block">
+        <p class="sidebar-label">বিষয় অনুযায়ী</p>
+        <div class="tag-cloud">
+          <button class="tag-btn" onclick="setCategory('Technology')">প্রযুক্তি</button>
+          <button class="tag-btn" onclick="setCategory('Education')">শিক্ষা</button>
+          <button class="tag-btn" onclick="setCategory('Business')">ব্যবসা</button>
+          <button class="tag-btn" onclick="setCategory('Health')">স্বাস্থ্য</button>
+          <button class="tag-btn" onclick="setCategory('Science')">বিজ্ঞান</button>
+          <button class="tag-btn" onclick="setCategory('Sports')">খেলাধুলা</button>
+          <button class="tag-btn" onclick="setCategory('Travel')">ভ্রমণ</button>
+          <button class="tag-btn" onclick="setCategory('Food')">খাবার</button>
+          <button class="tag-btn" onclick="setCategory('Lifestyle')">জীবনধারা</button>
+        </div>
+      </div>
+
+      <div class="cta-box">
+        <h4>✍️ আপনিও লিখুন</h4>
+        <p>আপনার জ্ঞান ও অভিজ্ঞতা লক্ষ পাঠকের সাথে শেয়ার করুন।</p>
+        <a href="register.html" class="btn btn-primary btn-full btn-sm">আজই শুরু করুন</a>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<!-- ════════════════ FOOTER ════════════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">✍️ BlogNest</div>
+        <p class="footer-desc">বাংলাদেশের সেরা ব্লগিং প্ল্যাটফর্ম। লিখুন, পড়ুন, শিখুন।</p>
+      </div>
+      <div>
+        <h4 class="footer-head">সাইট</h4>
+        <ul class="footer-links">
+          <li><a href="index.html">হোম</a></li>
+          <li><a href="write.html">লিখুন</a></li>
+          <li><a href="register.html">রেজিস্ট্রেশন</a></li>
+          <li><a href="login.html">লগইন</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="footer-head">বিষয়</h4>
+        <ul class="footer-links">
+          <li><a href="#" onclick="setCategory('Technology')">প্রযুক্তি</a></li>
+          <li><a href="#" onclick="setCategory('Education')">শিক্ষা</a></li>
+          <li><a href="#" onclick="setCategory('Business')">ব্যবসা</a></li>
+          <li><a href="#" onclick="setCategory('Health')">স্বাস্থ্য</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2024 BlogNest – সর্বস্বত্ব সংরক্ষিত</div>
+  </div>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/articles.js"></script>
+
+<script>
+  let activeCat    = 'all';
+  let lastSnap     = null;
+  let isFetching   = false;
+  let isSearchMode = false;
+
+  // ── Boot ──────────────────────────────────
+  initAuth();
+  loadFeed(true);
+
+  // ── Category bar click ────────────────────
+  document.getElementById('cat-list').addEventListener('click', e => {
+    const link = e.target.closest('[data-cat]');
+    if (!link) return;
+    e.preventDefault();
+    setCategory(link.dataset.cat);
+  });
+
+  function setCategory(cat) {
+    // Update active state in bar
+    document.querySelectorAll('[data-cat]').forEach(el => el.classList.remove('active'));
+    const target = document.querySelector(`[data-cat="${cat}"]`);
+    if (target) target.classList.add('active');
+
+    activeCat    = cat;
+    lastSnap     = null;
+    isSearchMode = false;
+    showLoading('feed-container');
+    document.getElementById('load-more-btn').style.display = 'none';
+    loadFeed(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Search ────────────────────────────────
+  document.getElementById('search-input').addEventListener('input', debounce(async e => {
+    const q = e.target.value.trim();
+    if (q.length < 2) {
+      if (isSearchMode) {
+        isSearchMode = false;
+        lastSnap     = null;
+        loadFeed(true);
+      }
+      return;
+    }
+
+    isSearchMode = true;
+    showLoading('feed-container');
+    document.getElementById('load-more-btn').style.display = 'none';
+
+    const results = await searchArticles(q);
+    paintFeed(results, true);
+  }, 400));
+
+  // ── Fetch & render feed ───────────────────
+  async function loadFeed(replace = false) {
+    if (isFetching) return;
+    isFetching = true;
+
+    try {
+      const { articles, lastDoc, hasMore } = await getArticles({
+        category: activeCat,
+        lastDoc: replace ? null : lastSnap
+      });
+
+      lastSnap = lastDoc;
+      paintFeed(articles, replace);
+      document.getElementById('load-more-btn').style.display = hasMore ? 'inline-flex' : 'none';
+
+    } catch (err) {
+      document.getElementById('feed-container').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">⚠️</div>
+          <h3>লোড ব্যর্থ হয়েছে</h3>
+          <p>${err.message}</p>
+        </div>`;
+    } finally {
+      isFetching = false;
+    }
+  }
+
+  function loadMore() { loadFeed(false); }
+
+  function paintFeed(articles, replace) {
+    const box = document.getElementById('feed-container');
+
+    if (!articles.length && replace) {
+      box.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <h3>কোনো আর্টিকেল নেই</h3>
+          <p>এই বিভাগে এখনো কিছু প্রকাশিত হয়নি</p>
+        </div>`;
+      return;
+    }
+
+    const html = articles.map(renderArticleCard).join('');
+
+    if (replace) {
+      box.innerHTML = `<div class="articles-grid fade-in">${html}</div>`;
+    } else {
+      const grid = box.querySelector('.articles-grid');
+      if (grid) grid.insertAdjacentHTML('beforeend', html);
+      else box.innerHTML = `<div class="articles-grid fade-in">${html}</div>`;
+    }
+  }
+</script>
+</body>
+</html>
