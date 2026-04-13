@@ -85,10 +85,15 @@
 <script>
   // ── Redirect if already logged in ─────────
   let isRegistering = false;
-  auth.onAuthStateChanged(user => {
-    if (user && !isRegistering) window.location.href = 'index.html';
+auth.onAuthStateChanged(user => {
+    const regBtn = document.getElementById('reg-btn');
+    const googleBtn = document.getElementById('google-btn');
+    const isRegistering = (regBtn && regBtn.disabled) || (googleBtn && googleBtn.disabled);
+    
+    if (user && !isRegistering) {
+      window.location.href = 'index.html';
+    }
   });
-
   const nameEl    = document.getElementById('name');
   const emailEl   = document.getElementById('email');
   const passEl    = document.getElementById('password');
