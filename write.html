@@ -115,6 +115,7 @@
   let quill;
   let editingId = null;
   let thumbURL  = '';
+  let thumbFile = null;
 
   // ── Require login + admin rights ─────────
   requireAdmin();
@@ -195,23 +196,20 @@
   // ── Thumbnail select ──────────────────────
   async function handleThumbSelect(e) {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file) {
+      console.error('handleThumbSelect: no file found');
+      return;
+    }
 
-    // Show local preview instantly
+    thumbFile = file;
+    thumbURL = '';
+
     const preview     = document.getElementById('thumb-preview');
     const placeholder = document.getElementById('thumb-placeholder');
     preview.src               = URL.createObjectURL(file);
     preview.style.display     = 'block';
     placeholder.style.display = 'none';
-
-    try {
-      showToast('থাম্বনেইল আপলোড হচ্ছে...');
-      thumbURL = await uploadThumbnail(file);
-      showToast('থাম্বনেইল আপলোড হয়েছে ✓');
-    } catch (err) {
-      showToast('থাম্বনেইল আপলোড ব্যর্থ', 'error');
-      thumbURL = '';
-    }
+    showToast('থাম্বনেইল নির্বাচন করা হয়েছে');
   }
 
   // ── Load article for editing ──────────────
@@ -267,11 +265,28 @@
   async function saveDraft()       { const d = collectData('draft');     if (d) await save(d); }
   async function publishArticle()  { const d = collectData('published'); if (d) await save(d); }
 
+  async function ensureThumbUploaded() {
+    if (!thumbFile || thumbURL) return thumbURL;
+    showToast('থাম্বনেইল আপলোড হচ্ছে...');
+    try {
+      thumbURL = await uploadThumbnail(thumbFile);
+      showToast('থাম্বনেইল আপলোড হয়েছে ✓');
+      return thumbURL;
+    } catch (err) {
+      console.error('ensureThumbUploaded error:', err);
+      throw err;
+    }
+  }
+
   async function save(data) {
     const statusEl = document.getElementById('save-status');
     statusEl.textContent = '💾 সেভ হচ্ছে...';
 
     try {
+      if (thumbFile && !thumbURL) {
+        data.thumbnail = await ensureThumbUploaded();
+      }
+
       if (editingId) {
         await updateArticle(editingId, data);
         statusEl.textContent = '✓ আপডেট হয়েছে';
@@ -296,6 +311,7 @@
       }
     } catch (err) {
       statusEl.textContent = '✗ ব্যর্থ';
+      console.error('save error:', err);
       showToast(err.message, 'error');
     }
   }

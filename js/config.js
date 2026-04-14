@@ -65,7 +65,7 @@ const CATEGORIES = [
 async function uploadToCloudinary(file) {
   if (!file) {
     console.error('Cloudinary upload failed: missing file');
-    return null;
+    throw new Error('কোনও ফাইল নির্বাচন করা হয়নি');
   }
 
   const formData = new FormData();
@@ -73,21 +73,27 @@ async function uploadToCloudinary(file) {
   formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
   try {
+    console.log('Cloudinary upload start:', { name: file.name, size: file.size, type: file.type });
     const res  = await fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData });
     const data = await res.json();
 
+    console.log('Cloudinary upload response:', data);
+
     if (!res.ok || data.error) {
-      console.error('Cloudinary upload failed:', data);
-      return null;
+      const message = data.error?.message || 'Cloudinary upload ব্যর্থ হয়েছে';
+      console.error('Cloudinary upload failed:', message, data);
+      throw new Error(message);
     }
 
-    if (data.secure_url) return data.secure_url;
-    if (data.url) return data.url;
+    const url = data.secure_url || data.url;
+    if (!url) {
+      console.error('Cloudinary upload missing secure_url:', data);
+      throw new Error('Cloudinary upload থেকে কোন URL ফিরেছে না');
+    }
 
-    console.error('Cloudinary upload returned no secure_url:', data);
-    return null;
+    return url;
   } catch (err) {
     console.error('Cloudinary upload error:', err);
-    return null;
+    throw err;
   }
 }
