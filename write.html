@@ -118,8 +118,10 @@
 
   // ── Init auth + check for edit mode ──────
   initAuth(async (user, profile) => {
+    console.log('Auth initialized - User:', user?.uid, 'Profile:', profile);
     // Check permission
-    if (!profile || profile.role !== 'admin') {
+    if (!profile || (profile.role !== 'admin' && user.uid !== ADMIN_UID)) {
+      console.error('Access denied - Profile role:', profile?.role, 'UID:', user.uid);
       showToast('পোস্ট তৈরি করার অনুমতি নেই', 'error');
       setTimeout(() => window.location.href = 'index.html', 2000);
       return;

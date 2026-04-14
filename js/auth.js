@@ -83,12 +83,14 @@ async function getUserProfile(uid) {
   // Auto-assign admin role if UID matches ADMIN_UID
   if (profile && uid === ADMIN_UID) {
     profile.role = 'admin';
+    console.log('Admin role assigned to user:', uid);
 
     // Also persist it to Firestore if not already set
     if (doc.data()?.role !== 'admin') {
       db.collection('users').doc(uid)
         .update({ role: 'admin' })
-        .catch(() => {});
+        .then(() => console.log('Admin role persisted to Firestore for:', uid))
+        .catch((err) => console.error('Failed to persist admin role:', err));
     }
   }
 

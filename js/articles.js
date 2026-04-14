@@ -13,8 +13,12 @@ async function createArticle(data) {
   const user = auth.currentUser;
   if (!user) throw new Error('লগইন প্রয়োজন');
 
+  console.log('Creating article - User UID:', user.uid);
+  console.log('Current User Profile:', currentUserProfile);
+
   // Check role permission
-  if (!currentUserProfile || currentUserProfile.role !== 'admin') {
+  if (!currentUserProfile || (currentUserProfile.role !== 'admin' && user.uid !== ADMIN_UID)) {
+    console.error('Permission denied - Role:', currentUserProfile?.role, 'UID:', user.uid);
     throw new Error('পোস্ট তৈরি করার অনুমতি নেই');
   }
 
@@ -37,14 +41,13 @@ async function createArticle(data) {
     updatedAt:    firebase.firestore.FieldValue.serverTimestamp()
   };
 
-  const ref = await db.collection('articles').add(article);
-
-  // Increment author's article count
-  db.collection('users').doc(user.uid)
-    .update({ articleCount: firebase.firestore.FieldValue.increment(1) })
-    .catch(() => {});
-
-  return { id: ref.id, ...article };
+  try {
+    const ref = await db.collection('articles').add(article);
+    return { id: ref.id, ...article };
+  } catch (firestoreErr) {
+    console.error('Firestore create error:', firestoreErr);
+    throw new Error('আর্টিকেল তৈরি ব্যর্থ: ' + firestoreErr.message);
+  }
 }
 
 // ════════════════════════════════════════════════════════════
@@ -55,7 +58,7 @@ async function updateArticle(articleId, data) {
   if (!user) throw new Error('লগইন প্রয়োজন');
 
   // Check role permission - only admins can edit
-  if (!currentUserProfile || currentUserProfile.role !== 'admin') {
+  if (!currentUserProfile || (currentUserProfile.role !== 'admin' && user.uid !== ADMIN_UID)) {
     throw new Error('আর্টিকেল সম্পাদনা করার অনুমতি নেই');
   }
 
@@ -65,7 +68,12 @@ async function updateArticle(articleId, data) {
   // Clean undefined values
   Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
 
-  await db.collection('articles').doc(articleId).update(payload);
+  try {
+    await db.collection('articles').doc(articleId).update(payload);
+  } catch (firestoreErr) {
+    console.error('Firestore update error:', firestoreErr);
+    throw new Error('আর্টিকেল আপডেট ব্যর্থ: ' + firestoreErr.message);
+  }
 }
 
 // ════════════════════════════════════════════════════════════
@@ -79,12 +87,17 @@ async function deleteArticle(articleId) {
   if (!snap.exists) throw new Error('আর্টিকেল পাওয়া যায়নি');
 
   const article  = snap.data();
-  const isAdmin  = currentUserProfile?.role === 'admin';
+  const isAdmin  = currentUserProfile?.role === 'admin' || user.uid === ADMIN_UID;
 
   if (!isAdmin)
     throw new Error('এই আর্টিকেল মুছতে আপনার অনুমতি নেই');
 
-  await db.collection('articles').doc(articleId).delete();
+  try {
+    await db.collection('articles').doc(articleId).delete();
+  } catch (firestoreErr) {
+    console.error('Firestore delete error:', firestoreErr);
+    throw new Error('আর্টিকেল মুছতে ব্যর্থ: ' + firestoreErr.message);
+  }
 
   // Note: Cloudinary images are managed from the Cloudinary dashboard
   // Decrement author's article count
