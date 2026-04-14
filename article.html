@@ -317,7 +317,15 @@
       const heading = document.getElementById('comments-heading');
       const match   = heading?.textContent.match(/\d+/);
       const cur     = match ? parseInt(match[0]) : 1;
-      if (heading) heading.textContent = `মন্তব্য (${Math.max(0, cur - 1)})`;
+      const newCount = Math.max(0, cur - 1);
+      if (heading) heading.textContent = `মন্তব্য (${newCount})`;
+
+      if (newCount === 0) {
+        const list = document.getElementById('comments-list');
+        if (list) list.innerHTML = `<div class="empty-state" style="padding:2rem 0">
+          <p>প্রথম মন্তব্য করুন!</p>
+        </div>`;
+      }
 
       showToast('মন্তব্য মুছে ফেলা হয়েছে');
     } catch (err) {
