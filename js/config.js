@@ -63,6 +63,7 @@ const CATEGORIES = [
 
 // ── Cloudinary upload helper (used by articles.js) ───────────
 async function uploadToCloudinary(file) {
+  if (!auth.currentUser) throw new Error('লগইন প্রয়োজন');
   if (!file) {
     console.error('Cloudinary upload failed: missing file');
     throw new Error('কোনও ফাইল নির্বাচন করা হয়নি');

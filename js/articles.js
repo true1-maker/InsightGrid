@@ -293,23 +293,6 @@ async function toggleBookmark(articleId) {
 // ════════════════════════════════════════════════════════════
 //  IMAGE UPLOAD — via Cloudinary
 // ════════════════════════════════════════════════════════════
-async function uploadThumbnail(file) {
-  if (!auth.currentUser) throw new Error('লগইন প্রয়োজন');
-  if (!file) throw new Error('কোনও থাম্বনেইল নির্বাচন করা হয়নি');
-  const url = await uploadToCloudinary(file);
-  if (!url) throw new Error('থাম্বনেইল আপলোড ব্যর্থ হয়েছে');
-  return url;
-}
-window.uploadThumbnail = uploadThumbnail;
-
-async function uploadInlineImage(file) {
-  if (!auth.currentUser) throw new Error('লগইন প্রয়োজন');
-  if (!file) throw new Error('কোনও ছবি নির্বাচন করা হয়নি');
-  const url = await uploadToCloudinary(file);
-  if (!url) throw new Error('ছবি আপলোড ব্যর্থ হয়েছে');
-  return url;
-}
-window.uploadInlineImage = uploadInlineImage;
 
 // ════════════════════════════════════════════════════════════
 //  COMMENTS

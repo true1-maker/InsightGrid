@@ -182,7 +182,7 @@
       if (!file) return;
       try {
         showToast('ছবি আপলোড হচ্ছে...');
-        const url   = await uploadInlineImage(file);
+        const url   = await uploadToCloudinary(file);
         const range = quill.getSelection(true);
         quill.insertEmbed(range.index, 'image', url);
         quill.setSelection(range.index + 1);
@@ -269,7 +269,7 @@
     if (!thumbFile || thumbURL) return thumbURL;
     showToast('থাম্বনেইল আপলোড হচ্ছে...');
     try {
-      thumbURL = await uploadThumbnail(thumbFile);
+      thumbURL = await uploadToCloudinary(thumbFile);
       showToast('থাম্বনেইল আপলোড হয়েছে ✓');
       return thumbURL;
     } catch (err) {
