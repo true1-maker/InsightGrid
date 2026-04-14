@@ -24,7 +24,15 @@ async function registerUser(email, password, displayName) {
     createdAt:    firebase.firestore.FieldValue.serverTimestamp()
   };
 
-  await db.collection('users').doc(cred.user.uid).set(profile);
+  try {
+    await db.collection('users').doc(cred.user.uid).set(profile);
+  } catch (firestoreErr) {
+    // Auth user তৈরি হয়েছে কিন্তু profile save হয়নি
+    // তাই sign out করে clean state এ ফিরে যাও
+    await auth.signOut();
+    throw new Error('প্রোফাইল তৈরি ব্যর্থ হয়েছে। Firestore rules চেক করুন।');
+  }
+
   return cred.user;
 }
 
