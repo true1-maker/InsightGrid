@@ -6,7 +6,7 @@ const firebaseConfig = {
   apiKey:            "AIzaSyB4jobCYJBlGeif138c9AJyuJYtpqy9JWQ",
   authDomain:        "insightgrid-697cc.firebaseapp.com",
   projectId:         "insightgrid-697cc",
-  storageBucket:     "insightgrid-697cc.firebasestorage.app",
+  storageBucket:     "insightgrid-697cc.appspot.com",
   messagingSenderId: "547445746637",
   appId:             "1:547445746637:web:89acbecd4b72fb733bb284",
   measurementId:     "G-SN5PXJ8XK4"
@@ -21,6 +21,10 @@ if (!firebase.apps.length) {
 window.auth = firebase.auth();
 window.db = firebase.firestore();
 window.storage = firebase.storage();
+
+const auth    = window.auth;
+const db      = window.db;
+const storage = window.storage;
 
 // ── Firestore Settings ───────────────────────────────────────
 window.db.settings({
@@ -59,13 +63,31 @@ const CATEGORIES = [
 
 // ── Cloudinary upload helper (used by articles.js) ───────────
 async function uploadToCloudinary(file) {
+  if (!file) {
+    console.error('Cloudinary upload failed: missing file');
+    return null;
+  }
+
   const formData = new FormData();
-  formData.append('file',         file);
+  formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
-  const res  = await fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData });
-  const data = await res.json();
+  try {
+    const res  = await fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData });
+    const data = await res.json();
 
-  if (!res.ok || data.error) throw new Error(data.error?.message || 'আপলোড ব্যর্থ হয়েছে');
-  return data.secure_url;
+    if (!res.ok || data.error) {
+      console.error('Cloudinary upload failed:', data);
+      return null;
+    }
+
+    if (data.secure_url) return data.secure_url;
+    if (data.url) return data.url;
+
+    console.error('Cloudinary upload returned no secure_url:', data);
+    return null;
+  } catch (err) {
+    console.error('Cloudinary upload error:', err);
+    return null;
+  }
 }

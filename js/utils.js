@@ -128,19 +128,20 @@ function copyToClipboard(text) {
  }
   
 async function uploadImage(file) {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", "blog_upload");
-  formData.append("folder", "blog/articles");
+  if (!file) {
+    console.error('uploadImage failed: missing file');
+    return null;
+  }
 
-  const res = await fetch(
-    "https://api.cloudinary.com/v1_1/dmqatg7jk/image/upload",
-    {
-      method: "POST",
-      body: formData
+  try {
+    const url = await uploadToCloudinary(file);
+    if (!url) {
+      console.error('uploadImage failed: Cloudinary returned no URL');
+      return null;
     }
-  );
-
-  const data = await res.json();
-  return data.secure_url;
+    return url;
+  } catch (err) {
+    console.error('uploadImage error:', err);
+    return null;
+  }
 }

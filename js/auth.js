@@ -137,17 +137,6 @@ async function updateUserProfile(uid, data) {
   }
 }
 
-// ── Upload Profile Photo ─────────────────────────────────────
-async function uploadProfilePhoto(file) {
-  const user = auth.currentUser;
-  if (!user) throw new Error('লগইন প্রয়োজন');
-  const ref = storage.ref(`avatars/${user.uid}`);
-  await ref.put(file);
-  const url = await ref.getDownloadURL();
-  await updateUserProfile(user.uid, { photoURL: url });
-  return url;
-}
-
 // ── Init Auth (call on every page) ───────────────────────────
 function initAuth(onUser = null, onNoUser = null) {
   auth.onAuthStateChanged(async (user) => {
@@ -264,16 +253,22 @@ document.addEventListener('click', (e) => {
 async function uploadProfilePhoto(file) {
   const user = auth.currentUser;
   if (!user) throw new Error('লগইন প্রয়োজন');
+  if (!file) throw new Error('কোনও ফাইল নির্বাচন করা হয়নি');
 
-  const ref = storage.ref(`profiles/${user.uid}`);
-  await ref.put(file);
-  const url = await ref.getDownloadURL();
+  try {
+    const ref = storage.ref(`profiles/${user.uid}`);
+    const snapshot = await ref.put(file);
+    const url = await snapshot.ref.getDownloadURL();
 
-  await db.collection('users').doc(user.uid).update({
-    photoURL: url
-  });
+    await db.collection('users').doc(user.uid).update({
+      photoURL: url
+    });
 
-  return url;
+    return url;
+  } catch (err) {
+    console.error('Profile photo upload error:', err);
+    throw new Error('প্রোফাইল ছবি আপলোড ব্যর্থ হয়েছে');
+  }
 }
 
 // ── Firebase error → Bengali message ────────────────────────
