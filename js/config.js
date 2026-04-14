@@ -17,8 +17,7 @@ firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db   = firebase.firestore();
-window.storage = firebase.storage();
-window.ADMIN_UID = "4zxg2gIs75UpghRuB1Ttil04BSj2";
+const storage = firebase.storage();
 
 // ── Firestore Settings ───────────────────────────────────────
 db.settings({ ignoreUndefinedProperties: true });
