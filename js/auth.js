@@ -260,6 +260,22 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// ── Upload Profile Photo ─────────────────────────────────────
+async function uploadProfilePhoto(file) {
+  const user = auth.currentUser;
+  if (!user) throw new Error('লগইন প্রয়োজন');
+
+  const ref = storage.ref(`profiles/${user.uid}`);
+  await ref.put(file);
+  const url = await ref.getDownloadURL();
+
+  await db.collection('users').doc(user.uid).update({
+    photoURL: url
+  });
+
+  return url;
+}
+
 // ── Firebase error → Bengali message ────────────────────────
 function firebaseErrorMessage(code) {
   const map = {

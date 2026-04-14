@@ -405,4 +405,7 @@ function renderComment(c, currentUid) {
     </div>
   </div>`;
       }
+
+// Make getArticles globally accessible
+window.getArticles = getArticles;
       
