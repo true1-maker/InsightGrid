@@ -77,24 +77,48 @@ async function logoutUser() {
 
 // ── Get Profile ──────────────────────────────────────────────
 async function getUserProfile(uid) {
-  const doc     = await db.collection('users').doc(uid).get();
-  const profile = doc.exists ? { id: doc.id, ...doc.data() } : null;
+  try {
+    const doc     = await db.collection('users').doc(uid).get();
+    const profile = doc.exists ? { id: doc.id, ...doc.data() } : null;
 
-  // Auto-assign admin role if UID matches ADMIN_UID
-  if (profile && uid === ADMIN_UID) {
-    profile.role = 'admin';
-    console.log('Admin role assigned to user:', uid);
+    console.log('👤 User Profile Fetch:', { uid: uid.slice(-8), exists: doc.exists, role: profile?.role });
 
-    // Also persist it to Firestore if not already set
-    if (doc.data()?.role !== 'admin') {
-      db.collection('users').doc(uid)
-        .update({ role: 'admin' })
-        .then(() => console.log('Admin role persisted to Firestore for:', uid))
-        .catch((err) => console.error('Failed to persist admin role:', err));
+    // Auto-assign admin role if UID matches ADMIN_UID
+    if (profile && uid === ADMIN_UID) {
+      profile.role = 'admin';
+      console.log('✓ Admin role assigned (UID match)', uid);
+
+      // Also persist it to Firestore if not already set
+      if (doc.data()?.role !== 'admin') {
+        console.log('⏳ Persisting admin role to Firestore...');
+        db.collection('users').doc(uid)
+          .update({ role: 'admin' })
+          .then(() => console.log('✓ Admin role persisted to Firestore'))
+          .catch((err) => {
+            console.error('❌ Failed to persist admin role:', err.message);
+            console.error('   This might block article creation. Check Firestore rules.');
+          });
+      }
     }
-  }
 
-  return profile;
+    return profile;
+  } catch (err) {
+    console.error('❌ Failed to fetch user profile:', err.message);
+    throw err;
+  }
+}
+
+// ── Admin helpers ────────────────────────────────────────────
+function isAdminUser(user, profile) {
+  return Boolean(user && (profile?.role === 'admin' || user.uid === ADMIN_UID));
+}
+
+function setAdminVisibility(isAdmin = false) {
+  document.querySelectorAll('.admin-only').forEach(el => {
+    if (isAdmin) return;
+    el.style.display = 'none';
+    if (el.parentNode) el.parentNode.removeChild(el);
+  });
 }
 
 // ── Update Profile ───────────────────────────────────────────
@@ -129,12 +153,18 @@ function initAuth(onUser = null, onNoUser = null) {
   auth.onAuthStateChanged(async (user) => {
     currentUser = user;
     if (user) {
+      console.log('🔐 Auth State Changed - User:', user.uid.slice(-8));
       currentUserProfile = await getUserProfile(user.uid);
-      updateNavbarUI(user, currentUserProfile);
+      const isAdmin = isAdminUser(user, currentUserProfile);
+      console.log('📊 Auth Status:', { isAdmin, role: currentUserProfile?.role, uid: user.uid.slice(-8) });
+      updateNavbarUI(user, currentUserProfile, isAdmin);
+      setAdminVisibility(isAdmin);
       if (onUser) onUser(user, currentUserProfile);
     } else {
+      console.log('🔓 Not logged in');
       currentUserProfile = null;
-      updateNavbarUI(null, null);
+      updateNavbarUI(null, null, false);
+      setAdminVisibility(false);
       if (onNoUser) onNoUser();
     }
   });
@@ -150,8 +180,32 @@ function requireAuth() {
   });
 }
 
+// ── Require Admin (redirect if not admin) ────────────────────
+function requireAdmin() {
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      console.log('⛔ Redirecting: User not logged in');
+      window.location.href =
+        `login.html?redirect=${encodeURIComponent(window.location.href)}`;
+      return;
+    }
+
+    const profile = await getUserProfile(user.uid);
+    const isAdmin = isAdminUser(user, profile);
+    
+    console.log('🔐 Admin Check:', { isAdmin, role: profile?.role, uid: user.uid.slice(-8) });
+    
+    if (!isAdmin) {
+      console.error('⛔ ADMIN ACCESS DENIED');
+      console.error('   User UID:', user.uid.slice(-8), '(Expected:', ADMIN_UID.slice(-8) + ')');
+      console.error('   Profile role:', profile?.role);
+      window.location.href = 'index.html';
+    }
+  });
+}
+
 // ── Update Navbar UI ─────────────────────────────────────────
-function updateNavbarUI(user, profile) {
+function updateNavbarUI(user, profile, isAdmin = false) {
   const loginBtn  = document.getElementById('nav-login-btn');
   const writeBtn  = document.getElementById('nav-write-btn');
   const userMenu  = document.getElementById('nav-user-menu');
@@ -161,8 +215,7 @@ function updateNavbarUI(user, profile) {
   if (user) {
     if (loginBtn) loginBtn.style.display = 'none';
     if (writeBtn) {
-      const canWrite = profile?.role === 'admin';
-      writeBtn.style.display = canWrite ? 'inline-flex' : 'none';
+      writeBtn.style.display = isAdmin ? 'inline-flex' : 'none';
     }
     if (userMenu) userMenu.style.display = 'block';
 

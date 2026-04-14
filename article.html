@@ -41,7 +41,7 @@
         </div>
         <div class="dropdown-menu" id="user-dd">
           <a href="dashboard.html"><i data-lucide="bar-chart-3"></i> ড্যাশবোর্ড</a>
-          <a href="write.html"><i data-lucide="edit"></i> নতুন পোস্ট</a>
+          <a href="write.html" class="admin-only"><i data-lucide="edit"></i> নতুন পোস্ট</a>
           <a href="profile.html"><i data-lucide="user"></i> প্রোফাইল</a>
           <div class="dropdown-divider"></div>
           <button onclick="handleLogout()"><i data-lucide="log-out"></i> লগআউট</button>
@@ -194,9 +194,9 @@
     // Set engagement button states after auth loads
     refreshEngagementUI();
 
-    // Show edit button if author
+    // Show edit button only for admin users
     auth.onAuthStateChanged(user => {
-      if (user && user.uid === a.authorId) {
+      if (user && isAdminUser(user, currentUserProfile)) {
         document.getElementById('edit-btn-wrap').innerHTML =
           `<a href="write.html?id=${a.id}" class="btn btn-outline btn-sm"><i data-lucide="edit"></i> সম্পাদনা</a>`;
         lucide.createIcons();

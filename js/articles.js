@@ -13,14 +13,25 @@ async function createArticle(data) {
   const user = auth.currentUser;
   if (!user) throw new Error('লগইন প্রয়োজন');
 
-  console.log('Creating article - User UID:', user.uid);
+  console.log('========== CREATE ARTICLE DEBUG ==========');
+  console.log('Current User UID:', user.uid);
+  console.log('Expected ADMIN_UID:', ADMIN_UID);
+  console.log('Match:', user.uid === ADMIN_UID);
   console.log('Current User Profile:', currentUserProfile);
+  console.log('Profile Role:', currentUserProfile?.role);
+  console.log('==========================================');
 
   // Check role permission
-  if (user.uid !== ADMIN_UID && (!currentUserProfile || currentUserProfile.role !== 'admin')) {
-    console.error('Permission denied - Role:', currentUserProfile?.role, 'UID:', user.uid);
-    throw new Error('পোস্ট তৈরি করার অনুমতি নেই');
+  const isAdmin = currentUserProfile?.role === 'admin' || user.uid === ADMIN_UID;
+  if (!isAdmin) {
+    console.error('❌ PERMISSION DENIED');
+    console.error('   - Profile role:', currentUserProfile?.role);
+    console.error('   - User UID:', user.uid);
+    console.error('   - Expected ADMIN_UID:', ADMIN_UID);
+    throw new Error('❌ পোস্ট তৈরি করার অনুমতি নেই (Admin UID: ' + ADMIN_UID.slice(-5) + ')');
   }
+  
+  console.log('✓ Admin check passed');
 
   const article = {
     title:        data.title.trim(),
@@ -42,11 +53,18 @@ async function createArticle(data) {
   };
 
   try {
+    console.log('📝 Creating article...');
     const ref = await db.collection('articles').add(article);
+    console.log('✓ Article created successfully:', ref.id.slice(-8));
     return { id: ref.id, ...article };
   } catch (firestoreErr) {
-    console.error('Firestore create error:', firestoreErr);
-    throw new Error('আর্টিকেল তৈরি ব্যর্থ: ' + firestoreErr.message);
+    console.error('❌ Firestore create error:', firestoreErr.message);
+    console.error('   Admin UID:', ADMIN_UID);
+    console.error('   User UID:', user.uid);
+    console.error('   Action: Check Firestore Rules in Firebase Console');
+    console.error('   Error Code:', firestoreErr.code);
+    throw new Error('❌ আর্টিকেল তৈরি ব্যর্থ: ' + firestoreErr.message);
+  }
   }
 }
 
@@ -58,8 +76,12 @@ async function updateArticle(articleId, data) {
   if (!user) throw new Error('লগইন প্রয়োজন');
 
   // Check role permission - only admins can edit
-  if (!currentUserProfile || (currentUserProfile.role !== 'admin' && user.uid !== ADMIN_UID)) {
-    throw new Error('আর্টিকেল সম্পাদনা করার অনুমতি নেই');
+  const isAdmin = currentUserProfile?.role === 'admin' || user.uid === ADMIN_UID;
+  if (!isAdmin) {
+    console.error('❌ UPDATE ARTICLE PERMISSION DENIED');
+    console.error('   User UID:', user.uid.slice(-8));
+    console.error('   Expected ADMIN_UID:', ADMIN_UID.slice(-8));
+    throw new Error('❌ আর্টিকেল সম্পাদনা করার অনুমতি নেই (Admin Only)');
   }
 
   const payload = { ...data, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
@@ -69,10 +91,15 @@ async function updateArticle(articleId, data) {
   Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
 
   try {
+    console.log('📝 Updating article:', articleId.slice(-8));
     await db.collection('articles').doc(articleId).update(payload);
+    console.log('✓ Article updated successfully');
   } catch (firestoreErr) {
-    console.error('Firestore update error:', firestoreErr);
-    throw new Error('আর্টিকেল আপডেট ব্যর্থ: ' + firestoreErr.message);
+    console.error('❌ Firestore update error:', firestoreErr.message);
+    console.error('   Admin UID:', ADMIN_UID);
+    console.error('   User UID:', user.uid);
+    console.error('   Check Firestore Rules tab in Firebase Console');
+    throw new Error('❌ আর্টিকেল আপডেট ব্যর্থ: ' + firestoreErr.message);
   }
 }
 
@@ -89,14 +116,22 @@ async function deleteArticle(articleId) {
   const article  = snap.data();
   const isAdmin  = currentUserProfile?.role === 'admin' || user.uid === ADMIN_UID;
 
-  if (!isAdmin)
-    throw new Error('এই আর্টিকেল মুছতে আপনার অনুমতি নেই');
+  if (!isAdmin) {
+    console.error('❌ DELETE ARTICLE PERMISSION DENIED');
+    console.error('   User UID:', user.uid.slice(-8));
+    console.error('   Expected ADMIN_UID:', ADMIN_UID.slice(-8));
+    throw new Error('❌ এই আর্টিকেল মুছতে আপনার অনুমতি নেই (Admin Only)');
+  }
 
   try {
+    console.log('🗑️  Deleting article:', articleId.slice(-8));
     await db.collection('articles').doc(articleId).delete();
+    console.log('✓ Article deleted successfully');
   } catch (firestoreErr) {
-    console.error('Firestore delete error:', firestoreErr);
-    throw new Error('আর্টিকেল মুছতে ব্যর্থ: ' + firestoreErr.message);
+    console.error('❌ Firestore delete error:', firestoreErr.message);
+    console.error('   Admin UID:', ADMIN_UID);
+    console.error('   User UID:', user.uid);
+    throw new Error('❌ আর্টিকেল মুছতে ব্যর্থ: ' + firestoreErr.message);
   }
 
   // Note: Cloudinary images are managed from the Cloudinary dashboard

@@ -36,7 +36,7 @@
           <span id="nav-initials"></span>
         </div>
         <div class="dropdown-menu" id="user-dd">
-          <a href="write.html"><i data-lucide="edit"></i> নতুন পোস্ট</a>
+          <a href="write.html" class="admin-only"><i data-lucide="edit"></i> নতুন পোস্ট</a>
           <a href="profile.html"><i data-lucide="user"></i> প্রোফাইল</a>
           <div class="dropdown-divider"></div>
           <button onclick="handleLogout()"><i data-lucide="log-out"></i> লগআউট</button>
@@ -84,7 +84,7 @@
   <!-- Articles table -->
   <div class="section-row">
     <h2 class="section-heading">আমার লেখাসমূহ</h2>
-    <a href="write.html" class="btn btn-primary btn-sm">+ নতুন লিখুন</a>
+    <a href="write.html" class="btn btn-primary btn-sm admin-only">+ নতুন লিখুন</a>
   </div>
 
   <div id="articles-area">
@@ -113,7 +113,7 @@
 <script src="js/articles.js"></script>
 
 <script>
-  requireAuth();
+  requireAdmin();
 
   initAuth(async (user, profile) => {
     // Check permission for write button
@@ -340,37 +340,3 @@
 <script>lucide.createIcons();</script>
 </body>
 </html>
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Helper function to check if user is admin
-    function isAdmin() {
-      return request.auth != null && (
-        request.auth.uid == "4zxg2gIs75UpghRuB1Ttil04BSj2" ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
-      );
-    }
-    
-    // Users collection
-    match /users/{userId} {
-      // Users can read/write their own profile
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      // Admins can read all profiles
-      allow read: if isAdmin();
-    }
-    
-    // Articles collection - STRICT ADMIN ONLY
-    match /articles/{articleId} {
-      // Authenticated users can read all articles
-      allow read: if request.auth != null;
-      // ONLY admins can create, update, or delete articles
-      allow create, update, delete: if isAdmin();
-    }
-    
-    // All other collections (comments, etc.) - authenticated users only
-    match /{document=**} {
-      allow read, write: if request.auth != null;
-    }
-  }
-}
