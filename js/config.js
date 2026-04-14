@@ -13,17 +13,28 @@ const firebaseConfig = {
 };
 
 // ── Initialize Firebase ──────────────────────────────────────
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
-const auth = firebase.auth();
-const db   = firebase.firestore();
+// ── Global Firebase Services ─────────────────────────────────
+window.auth = firebase.auth();
+window.db = firebase.firestore();
 window.storage = firebase.storage();
 
 // ── Firestore Settings ───────────────────────────────────────
-db.settings({ ignoreUndefinedProperties: true });
+window.db.settings({
+  ignoreUndefinedProperties: true
+});
 
-// ── Admin ───────────────────────────────────────────────────
-const ADMIN_UID = "4zxg2gIs75UpghRuB1Ttil04BSj2";
+// ── Admin Configuration ──────────────────────────────────────
+window.ADMIN_UID = "4zxg2gIs75UpghRuB1Ttil04BSj2";
+
+// ── Safe Helper (Optional but Recommended) ───────────────────
+window.isAdmin = function () {
+  return window.auth.currentUser &&
+         window.auth.currentUser.uid === window.ADMIN_UID;
+};
 
 // ── Cloudinary Config (used for all image uploads) ───────────
 const CLOUDINARY_CLOUD_NAME   = "dmqatg7jk";
