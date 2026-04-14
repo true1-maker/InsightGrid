@@ -1,5 +1,5 @@
 // ============================================================
-//  BlogNest — Utility Functions
+//  InsightGrid — Utility Functions
 //  Used across all pages. Load this before auth.js & articles.js
 // ============================================================
 

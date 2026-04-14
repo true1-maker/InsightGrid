@@ -1,5 +1,5 @@
 // ============================================================
-//  BlogNest — Authentication & User Management
+//  InsightGrid — Authentication & User Management
 //  Handles: register, login, logout, profile CRUD, navbar UI
 // ============================================================
 

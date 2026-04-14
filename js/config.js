@@ -1,5 +1,5 @@
 // ============================================================
-//  BlogNest — Firebase + Cloudinary Configuration
+//  InsightGrid — Firebase + Cloudinary Configuration
 // ============================================================
 
 const firebaseConfig = {

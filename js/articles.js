@@ -1,5 +1,5 @@
 // ============================================================
-//  BlogNest — Articles, Comments & Engagement
+//  InsightGrid — Articles, Comments & Engagement
 //  Handles: create, read, update, delete articles
 //           comments, likes, bookmarks, image upload, rendering
 // ============================================================
@@ -133,16 +133,39 @@ async function getUserArticles(userId) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-// ── Search articles by title prefix ──────────────────────
+// ── Search articles by title & content (case-insensitive) ──
 async function searchArticles(query) {
   if (!query || query.length < 2) return [];
-  const snap = await db.collection('articles')
-    .where('status', '==', 'published')
-    .orderBy('title')
-    .startAt(query)
-    .endAt(query + '\uf8ff')
-    .limit(20).get();
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  
+  const lowerQuery = query.toLowerCase();
+  
+  try {
+    // Fetch all published articles (with reasonable limit)
+    const snap = await db.collection('articles')
+      .where('status', '==', 'published')
+      .orderBy('createdAt', 'desc')
+      .limit(100)
+      .get();
+    
+    // Client-side filtering for case-insensitive search
+    const results = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(article => {
+        const titleMatch = (article.title || '').toLowerCase().includes(lowerQuery);
+        const contentMatch = (article.content || '').toLowerCase().includes(lowerQuery);
+        const tagsMatch = (article.tags || []).some(tag => 
+          (tag || '').toLowerCase().includes(lowerQuery)
+        );
+        return titleMatch || contentMatch || tagsMatch;
+      })
+      .slice(0, 20); // Return top 20 results
+    
+    return results;
+  } catch (err) {
+    console.error('Search error:', err.message);
+    showToast(`সার্চ ব্যর্থ: ${err.message}`, 'error');
+    return [];
+  }
 }
 
 // ── Get user's bookmarked articles ────────────────────────
@@ -271,7 +294,7 @@ async function deleteComment(commentId, articleId) {
 function renderArticleCard(a) {
   const thumb = a.thumbnail
     ? `<img src="${a.thumbnail}" alt="${a.title}" class="card-thumb" loading="lazy">`
-    : `<div class="card-thumb no-thumb">📄</div>`;
+    : `<div class="card-thumb no-thumb"><i data-lucide="file-text"></i></div>`;
 
   const tags = (a.tags || []).slice(0, 2)
     .map(t => `<span class="tag">${t}</span>`).join('');
@@ -294,9 +317,9 @@ function renderArticleCard(a) {
       <div class="card-footer">
         <div class="card-tags">${tags}</div>
         <div class="card-stats">
-          <span>⏱ ${a.readTime}মি</span>
-          <span>👁 ${formatNumber(a.views)}</span>
-          <span>❤️ ${(a.likes || []).length}</span>
+          <span><i data-lucide="clock" style="width:0.9em;height:0.9em;display:inline;vertical-align:text-bottom"></i> ${a.readTime}মি</span>
+          <span><i data-lucide="eye" style="width:0.9em;height:0.9em;display:inline;vertical-align:text-bottom"></i> ${formatNumber(a.views)}</span>
+          <span><i data-lucide="heart" style="width:0.9em;height:0.9em;display:inline;vertical-align:text-bottom"></i> ${(a.likes || []).length}</span>
         </div>
       </div>
     </div>

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BlogNest – বাংলা ব্লগ প্ল্যাটফর্ম</title>
-  <meta name="description" content="বাংলাদেশের সেরা ব্লগিং প্ল্যাটফর্ম। লিখুন, শেয়ার করুন, শিখুন।">
+  <title>InsightGrid – বাংলা ব্লগ প্ল্যাটফর্ম</title>
+  <meta name="description" content="InsightGrid - বাংলায় জ্ঞান শেয়ারের সেরা প্ল্যাটফর্ম। লিখুন, পড়ুন, শিখুন এবং আপনার অভিজ্ঞতা বিশ্বের সাথে শেয়ার করুন।">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
 <!-- ════════════════ NAVBAR ════════════════ -->
 <nav class="navbar">
   <div class="container">
-    <a href="index.html" class="nav-brand"><i data-lucide="pen"></i> BlogNest</a>
+    <a href="index.html" class="nav-brand"><i data-lucide="pen"></i> InsightGrid</a>
 
     <div class="nav-search">
       <span class="search-icon"><i data-lucide="search"></i></span>
@@ -122,7 +122,7 @@
   <div class="container">
     <div class="footer-grid">
       <div>
-        <div class="footer-brand"><i data-lucide="pen"></i> BlogNest</div>
+        <div class="footer-brand"><i data-lucide="pen"></i> InsightGrid</div>
         <p class="footer-desc">বাংলাদেশের সেরা ব্লগিং প্ল্যাটফর্ম। লিখুন, পড়ুন, শিখুন।</p>
       </div>
       <div>
@@ -144,7 +144,7 @@
         </ul>
       </div>
     </div>
-    <div class="footer-bottom">© 2024 BlogNest – সর্বস্বত্ব সংরক্ষিত</div>
+    <div class="footer-bottom">© 2024 InsightGrid – সর্বস্বত্ব সংরক্ষিত</div>
   </div>
 </footer>
 
@@ -231,10 +231,11 @@
     } catch (err) {
       document.getElementById('feed-container').innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">⚠️</div>
+          <div class="empty-icon"><i data-lucide="alert-circle"></i></div>
           <h3>লোড ব্যর্থ হয়েছে</h3>
           <p>${err.message}</p>
         </div>`;
+      lucide.createIcons();
     } finally {
       isFetching = false;
     }
@@ -246,12 +247,19 @@
     const box = document.getElementById('feed-container');
 
     if (!articles.length && replace) {
-      box.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">📭</div>
-          <h3>কোনো আর্টিকেল নেই</h3>
-          <p>এই বিভাগে এখনো কিছু প্রকাশিত হয়নি</p>
-        </div>`;
+      const emptyMsg = isSearchMode 
+        ? `<div class="empty-state">
+             <div class="empty-icon"><i data-lucide="search"></i></div>
+             <h3>কোনো ফলাফল পাওয়া যায়নি</h3>
+             <p>আপনার সার্চ এর সাথে মিলে এমন কোনো আর্টিকেল নেই</p>
+           </div>`
+        : `<div class="empty-state">
+             <div class="empty-icon"><i data-lucide="inbox"></i></div>
+             <h3>কোনো আর্টিকেল নেই</h3>
+             <p>এই বিভাগে এখনো কিছু প্রকাশিত হয়নি</p>
+           </div>`;
+      box.innerHTML = emptyMsg;
+      lucide.createIcons();
       return;
     }
 
@@ -264,6 +272,8 @@
       if (grid) grid.insertAdjacentHTML('beforeend', html);
       else box.innerHTML = `<div class="articles-grid fade-in">${html}</div>`;
     }
+    
+    lucide.createIcons();
   }
 </script>
 <script>lucide.createIcons();</script>

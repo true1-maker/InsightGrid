@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>আর্টিকেল – BlogNest</title>
+  <title>আর্টিকেল – InsightGrid</title>
   <meta id="meta-desc"  name="description" content="">
   <meta id="meta-og-title"   property="og:title"       content="">
   <meta id="meta-og-image"   property="og:image"       content="">
@@ -19,7 +19,7 @@
 <!-- ════════════════ NAVBAR ════════════════ -->
 <nav class="navbar">
   <div class="container">
-    <a href="index.html" class="nav-brand"><i data-lucide="pen"></i> BlogNest</a>
+    <a href="index.html" class="nav-brand"><i data-lucide="pen"></i> InsightGrid</a>
     <div class="nav-actions">
       <a href="write.html" class="btn btn-outline btn-sm" id="nav-write-btn" style="display:none"><i data-lucide="edit"></i> লিখুন</a>
       <a href="login.html" class="btn btn-primary btn-sm" id="nav-login-btn">লগইন</a>
@@ -83,7 +83,7 @@
       if (!articleData) { showNotFound(); return; }
 
       // Update page meta
-      document.title = `${articleData.title} – BlogNest`;
+      document.title = `${articleData.title} – InsightGrid`;
       document.getElementById('meta-desc').content        = truncateText(articleData.content, 155);
       document.getElementById('meta-og-title').content    = articleData.title;
       document.getElementById('meta-og-desc').content     = truncateText(articleData.content, 155);
