@@ -97,3 +97,4 @@ async function uploadToCloudinary(file) {
     throw err;
   }
 }
+window.uploadToCloudinary = uploadToCloudinary;

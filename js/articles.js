@@ -300,6 +300,7 @@ async function uploadThumbnail(file) {
   if (!url) throw new Error('থাম্বনেইল আপলোড ব্যর্থ হয়েছে');
   return url;
 }
+window.uploadThumbnail = uploadThumbnail;
 
 async function uploadInlineImage(file) {
   if (!auth.currentUser) throw new Error('লগইন প্রয়োজন');
@@ -308,6 +309,7 @@ async function uploadInlineImage(file) {
   if (!url) throw new Error('ছবি আপলোড ব্যর্থ হয়েছে');
   return url;
 }
+window.uploadInlineImage = uploadInlineImage;
 
 // ════════════════════════════════════════════════════════════
 //  COMMENTS
