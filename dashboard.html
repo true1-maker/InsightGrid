@@ -8,15 +8,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
 <!-- ════════════════ NAVBAR ════════════════ -->
 <nav class="navbar">
   <div class="container">
-    <a href="index.html" class="nav-brand">✍️ BlogNest</a>
+    <a href="index.html" class="nav-brand"><i data-lucide="pen"></i> BlogNest</a>
     <div class="nav-actions">
-      <a href="write.html" class="btn btn-primary btn-sm" id="nav-write-btn" style="display:none">✏️ নতুন পোস্ট</a>
+      <a href="write.html" class="btn btn-primary btn-sm" id="nav-write-btn" style="display:none"><i data-lucide="edit"></i> নতুন পোস্ট</a>
       <a href="login.html" class="btn btn-primary btn-sm" id="nav-login-btn">লগইন</a>
 
       <div class="dropdown" id="nav-user-menu" style="display:none">
@@ -25,10 +26,10 @@
           <span id="nav-initials"></span>
         </div>
         <div class="dropdown-menu" id="user-dd">
-          <a href="write.html">✏️ নতুন পোস্ট</a>
-          <a href="profile.html">👤 প্রোফাইল</a>
+          <a href="write.html"><i data-lucide="edit"></i> নতুন পোস্ট</a>
+          <a href="profile.html"><i data-lucide="user"></i> প্রোফাইল</a>
           <div class="dropdown-divider"></div>
-          <button onclick="handleLogout()">🚪 লগআউট</button>
+          <button onclick="handleLogout()"><i data-lucide="log-out"></i> লগআউট</button>
         </div>
       </div>
     </div>
@@ -106,7 +107,10 @@
 
   initAuth(async (user, profile) => {
     document.getElementById('dash-title').textContent =
-      `স্বাগতম, ${user.displayName?.split(' ')[0] || 'লেখক'}! 👋`;
+      `স্বাগতম, ${user.displayName?.split(' ')[0] || 'লেখক'}! `;
+    const titleEl = document.getElementById('dash-title');
+    titleEl.innerHTML += '<i data-lucide="hand" style="width:1em;height:1em;vertical-align:text-bottom;display:inline;margin-left:0.25rem"></i>';
+    lucide.createIcons();
 
     await loadDashboard(user.uid);
   });
@@ -150,11 +154,12 @@
     if (!articles.length) {
       area.innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">✍️</div>
+          <div class="empty-icon"><i data-lucide="pen"></i></div>
           <h3>এখনো কোনো লেখা নেই</h3>
           <p>আপনার প্রথম আর্টিকেল লিখুন!</p>
           <a href="write.html" class="btn btn-primary" style="margin-top:1.25rem">লেখা শুরু করুন</a>
         </div>`;
+      lucide.createIcons();
       return;
     }
 
@@ -231,5 +236,6 @@
     }
   }
 </script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

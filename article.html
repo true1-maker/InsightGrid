@@ -12,15 +12,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
 <!-- ════════════════ NAVBAR ════════════════ -->
 <nav class="navbar">
   <div class="container">
-    <a href="index.html" class="nav-brand">✍️ BlogNest</a>
+    <a href="index.html" class="nav-brand"><i data-lucide="pen"></i> BlogNest</a>
     <div class="nav-actions">
-      <a href="write.html" class="btn btn-outline btn-sm" id="nav-write-btn" style="display:none">✏️ লিখুন</a>
+      <a href="write.html" class="btn btn-outline btn-sm" id="nav-write-btn" style="display:none"><i data-lucide="edit"></i> লিখুন</a>
       <a href="login.html" class="btn btn-primary btn-sm" id="nav-login-btn">লগইন</a>
 
       <div class="dropdown" id="nav-user-menu" style="display:none">
@@ -29,11 +30,11 @@
           <span id="nav-initials"></span>
         </div>
         <div class="dropdown-menu" id="user-dd">
-          <a href="dashboard.html">📊 ড্যাশবোর্ড</a>
-          <a href="write.html">✏️ নতুন পোস্ট</a>
-          <a href="profile.html">👤 প্রোফাইল</a>
+          <a href="dashboard.html"><i data-lucide="bar-chart-3"></i> ড্যাশবোর্ড</a>
+          <a href="write.html"><i data-lucide="edit"></i> নতুন পোস্ট</a>
+          <a href="profile.html"><i data-lucide="user"></i> প্রোফাইল</a>
           <div class="dropdown-divider"></div>
-          <button onclick="handleLogout()">🚪 লগআউট</button>
+          <button onclick="handleLogout()"><i data-lucide="log-out"></i> লগআউট</button>
         </div>
       </div>
     </div>
@@ -123,18 +124,18 @@
               </div>
               <div class="art-date">
                 ${formatDate(a.createdAt)} &nbsp;·&nbsp;
-                ⏱ ${a.readTime} মিনিটের পড়া &nbsp;·&nbsp;
-                👁 ${formatNumber(a.views)}
+                <i data-lucide="clock" style="width:1em;height:1em;vertical-align:text-bottom;display:inline"></i> ${a.readTime} মিনিটের পড়া &nbsp;·&nbsp;
+                <i data-lucide="eye" style="width:1em;height:1em;vertical-align:text-bottom;display:inline"></i> ${formatNumber(a.views)}
               </div>
             </div>
           </div>
 
           <div class="art-actions">
             <button class="act-btn" id="like-btn" onclick="handleLike()">
-              🤍 <span id="like-count">${(a.likes || []).length}</span>
+              <i data-lucide="heart" style="width:1em;height:1em;vertical-align:text-bottom;display:inline"></i> <span id="like-count">${(a.likes || []).length}</span>
             </button>
-            <button class="act-btn" id="bookmark-btn" onclick="handleBookmark()">🔖</button>
-            <button class="act-btn" onclick="handleShare()">🔗</button>
+            <button class="act-btn" id="bookmark-btn" onclick="handleBookmark()"><i data-lucide="bookmark" style="width:1em;height:1em;vertical-align:text-bottom;display:inline"></i></button>
+            <button class="act-btn" onclick="handleShare()"><i data-lucide="link" style="width:1em;height:1em;vertical-align:text-bottom;display:inline"></i></button>
             <div id="edit-btn-wrap"></div>
           </div>
         </div>
@@ -187,7 +188,8 @@
     auth.onAuthStateChanged(user => {
       if (user && user.uid === a.authorId) {
         document.getElementById('edit-btn-wrap').innerHTML =
-          `<a href="write.html?id=${a.id}" class="btn btn-outline btn-sm">✏️ সম্পাদনা</a>`;
+          `<a href="write.html?id=${a.id}" class="btn btn-outline btn-sm"><i data-lucide="edit"></i> সম্পাদনা</a>`;
+        lucide.createIcons();
       }
       // Update commenter avatar
       const init = document.getElementById('commenter-init');
@@ -201,7 +203,8 @@
     const btn   = document.getElementById('like-btn');
     if (btn) {
       btn.className = `act-btn${liked ? ' liked' : ''}`;
-      btn.innerHTML = `${liked ? '❤️' : '🤍'} <span id="like-count">${(articleData?.likes || []).length}</span>`;
+      btn.innerHTML = `<i data-lucide="heart" style="width:1em;height:1em;vertical-align:text-bottom;display:inline${liked ? ';fill:currentColor' : ''}"></i> <span id="like-count">${(articleData?.likes || []).length}</span>`;
+      lucide.createIcons();
     }
   }
 
@@ -220,13 +223,14 @@
 
     if (nowLiked) {
       btn.className = 'act-btn liked';
-      btn.innerHTML = `❤️ <span id="like-count">${cur + 1}</span>`;
+      btn.innerHTML = `<i data-lucide="heart" style="width:1em;height:1em;vertical-align:text-bottom;display:inline;fill:currentColor"></i> <span id="like-count">${cur + 1}</span>`;
       articleData.likes = [...(articleData.likes || []), auth.currentUser.uid];
     } else {
       btn.className = 'act-btn';
-      btn.innerHTML = `🤍 <span id="like-count">${Math.max(0, cur - 1)}</span>`;
+      btn.innerHTML = `<i data-lucide="heart" style="width:1em;height:1em;vertical-align:text-bottom;display:inline"></i> <span id="like-count">${Math.max(0, cur - 1)}</span>`;
       articleData.likes = (articleData.likes || []).filter(id => id !== auth.currentUser.uid);
     }
+    lucide.createIcons();
   }
 
   // ── Bookmark ──────────────────────────────
@@ -239,7 +243,8 @@
     if (saved === null) return;
     const btn = document.getElementById('bookmark-btn');
     btn.className = saved ? 'act-btn bookmarked' : 'act-btn';
-    btn.textContent = saved ? '🔖' : '🔖';
+    btn.innerHTML = `<i data-lucide="bookmark" style="width:1em;height:1em;vertical-align:text-bottom;display:inline${saved ? ';fill:currentColor' : ''}"></i>`;
+    lucide.createIcons();
     showToast(saved ? 'বুকমার্কে যোগ হয়েছে ✓' : 'বুকমার্ক থেকে সরানো হয়েছে');
   }
 
@@ -337,12 +342,14 @@
   function showNotFound() {
     document.getElementById('page-container').innerHTML = `
       <div class="empty-state" style="padding:5rem 1rem">
-        <div class="empty-icon">🔍</div>
+        <div class="empty-icon"><i data-lucide="search"></i></div>
         <h3>আর্টিকেল পাওয়া যায়নি</h3>
         <p>এই আর্টিকেলটি মুছে ফেলা হয়েছে বা পাওয়া যাচ্ছে না</p>
         <a href="index.html" class="btn btn-primary" style="margin-top:1.5rem">হোমে ফিরুন</a>
       </div>`;
+    lucide.createIcons();
   }
 </script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

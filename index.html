@@ -9,21 +9,22 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
 <!-- ════════════════ NAVBAR ════════════════ -->
 <nav class="navbar">
   <div class="container">
-    <a href="index.html" class="nav-brand">✍️ BlogNest</a>
+    <a href="index.html" class="nav-brand"><i data-lucide="pen"></i> BlogNest</a>
 
     <div class="nav-search">
-      <span class="search-icon">🔍</span>
+      <span class="search-icon"><i data-lucide="search"></i></span>
       <input type="text" id="search-input" placeholder="আর্টিকেল খুঁজুন...">
     </div>
 
     <div class="nav-actions">
-      <a href="write.html" class="btn btn-outline btn-sm" id="nav-write-btn" style="display:none">✏️ লিখুন</a>
+      <a href="write.html" class="btn btn-outline btn-sm" id="nav-write-btn" style="display:none"><i data-lucide="edit"></i> লিখুন</a>
       <a href="login.html" class="btn btn-primary btn-sm" id="nav-login-btn">লগইন</a>
 
       <div class="dropdown" id="nav-user-menu" style="display:none">
@@ -32,11 +33,11 @@
           <span id="nav-initials"></span>
         </div>
         <div class="dropdown-menu" id="user-dd">
-          <a href="dashboard.html">📊 ড্যাশবোর্ড</a>
-          <a href="write.html">✏️ নতুন পোস্ট</a>
-          <a href="profile.html">👤 প্রোফাইল</a>
+          <a href="dashboard.html"><i data-lucide="bar-chart-3"></i> ড্যাশবোর্ড</a>
+          <a href="write.html"><i data-lucide="edit"></i> নতুন পোস্ট</a>
+          <a href="profile.html"><i data-lucide="user"></i> প্রোফাইল</a>
           <div class="dropdown-divider"></div>
-          <button onclick="handleLogout()">🚪 লগআউট</button>
+          <button onclick="handleLogout()"><i data-lucide="log-out"></i> লগআউট</button>
         </div>
       </div>
     </div>
@@ -107,7 +108,7 @@
       </div>
 
       <div class="cta-box">
-        <h4>✍️ আপনিও লিখুন</h4>
+        <h4><i data-lucide="pen"></i> আপনিও লিখুন</h4>
         <p>আপনার জ্ঞান ও অভিজ্ঞতা লক্ষ পাঠকের সাথে শেয়ার করুন।</p>
         <a href="register.html" class="btn btn-primary btn-full btn-sm">আজই শুরু করুন</a>
       </div>
@@ -121,7 +122,7 @@
   <div class="container">
     <div class="footer-grid">
       <div>
-        <div class="footer-brand">✍️ BlogNest</div>
+        <div class="footer-brand"><i data-lucide="pen"></i> BlogNest</div>
         <p class="footer-desc">বাংলাদেশের সেরা ব্লগিং প্ল্যাটফর্ম। লিখুন, পড়ুন, শিখুন।</p>
       </div>
       <div>
@@ -265,5 +266,6 @@
     }
   }
 </script>
+<script>lucide.createIcons();</script>
 </body>
 </html>

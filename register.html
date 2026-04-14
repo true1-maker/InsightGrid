@@ -7,8 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-  <style>
+  <link rel="stylesheet" href="css/style.css">  <script src="https://unpkg.com/lucide@latest"></script>  <style>
     .auth-divider { display:flex; align-items:center; gap:.75rem; margin:.85rem 0; color:#9ca3af; font-size:.8rem; }
     .auth-divider::before, .auth-divider::after { content:''; flex:1; height:1px; background:var(--border); }
     .btn-google { background:#fff; border:1.5px solid var(--border); color:#374151; font-weight:500; gap:.6rem; }
@@ -20,7 +19,7 @@
 <div class="auth-page">
   <div class="auth-card">
 
-    <a href="index.html" class="auth-logo">✍️ BlogNest</a>
+    <a href="index.html" class="auth-logo"><i data-lucide="pen"></i> BlogNest</a>
     <h1 class="auth-title">অ্যাকাউন্ট তৈরি করুন</h1>
     <p class="auth-sub">বিনামূল্যে যোগ দিন এবং লেখালেখি শুরু করুন</p>
 
@@ -165,5 +164,6 @@ auth.onAuthStateChanged(user => {
     }
   }
 </script>
+<script>lucide.createIcons();</script>
 </body>
 </html>
