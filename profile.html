@@ -16,7 +16,17 @@
 <nav class="navbar">
   <div class="container">
     <a href="index.html" class="nav-brand"><i data-lucide="pen"></i> InsightGrid</a>
+
+    <div class="nav-search">
+      <span class="search-icon"><i data-lucide="search"></i></span>
+      <input type="text" id="search-input" placeholder="আর্টিকেল খুঁজুন...">
+      <div id="search-dropdown" class="search-dropdown"></div>
+    </div>
+
     <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle" aria-label="টিম টগল">
+        <i data-lucide="sun"></i>
+      </button>
       <a href="write.html" class="btn btn-primary btn-sm" id="nav-write-btn" style="display:none"><i data-lucide="edit"></i> নতুন পোস্ট</a>
       <a href="login.html" class="btn btn-primary btn-sm" id="nav-login-btn">লগইন</a>
 
@@ -40,46 +50,84 @@
 <!-- ════════════════ PROFILE BODY ════════════════ -->
 <div class="container profile-page">
 
-  <!-- Page header -->
-  <h1 class="page-title">প্রোফাইল</h1>
-  <p class="page-sub">আপনার প্রোফাইল তথ্য পরিবর্তন করুন</p>
+  <!-- Profile Header Card -->
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="profile-avatar-large" id="profile-avatar-large">
+        <img id="profile-avatar-img" src="" alt="Avatar" style="display:none">
+        <span id="profile-initials-large"></span>
+      </div>
 
-  <!-- Profile form -->
-  <div class="profile-form">
-    <div class="profile-avatar-section">
-      <div class="avatar-upload">
-        <img id="profile-avatar" src="" alt="Avatar" style="display:none">
-        <div id="avatar-placeholder" class="avatar-placeholder">
-          <span id="profile-initials"></span>
+      <div class="profile-info">
+        <h2 id="profile-name-display">আপনার নাম</h2>
+        <p class="profile-email" id="profile-email-display">email@example.com</p>
+        <span class="profile-role-badge" id="user-role">ব্যবহারকারী</span>
+
+        <div class="profile-stats-row">
+          <div class="profile-stat">
+            <div class="profile-stat-value" id="stat-articles">0</div>
+            <div class="profile-stat-label">আর্টিকেল</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value" id="stat-views">0</div>
+            <div class="profile-stat-label">মোট ভিউ</div>
+          </div>
         </div>
-        <input type="file" id="avatar-file" accept="image/*" onchange="handleAvatarSelect(event)">
-        <button class="btn btn-outline btn-sm" onclick="document.getElementById('avatar-file').click()">ছবি পরিবর্তন</button>
       </div>
     </div>
+  </div>
 
-    <div class="profile-fields">
-      <div class="form-group">
-        <label for="display-name">নাম</label>
-        <input type="text" id="display-name" placeholder="আপনার নাম">
+  <!-- Edit Profile Card -->
+  <div class="profile-card">
+    <div class="profile-section">
+      <h3 class="profile-section-title">প্রোফাইল সম্পাদনা</h3>
+
+      <div class="profile-form">
+        <div class="profile-form-group">
+          <label for="display-name">নাম</label>
+          <input type="text" id="display-name" placeholder="আপনার পূর্ণ নাম">
+        </div>
+
+        <div class="profile-form-group">
+          <label for="email">ইমেইল</label>
+          <input type="email" id="email" placeholder="আপনার ইমেইল" readonly style="opacity: 0.7; cursor: not-allowed;">
+        </div>
+
+        <div class="profile-form-group">
+          <label for="bio">সম্পর্কে</label>
+          <textarea id="bio" placeholder="নিজের সম্পর্কে সংক্ষিপ্ত তথ্য লিখুন (300 অক্ষর পর্যন্ত)"></textarea>
+        </div>
+
+        <div class="profile-form-actions">
+          <button class="btn btn-primary" onclick="saveProfile()">
+            <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+            পরিবর্তন সংরক্ষণ করুন
+          </button>
+        </div>
       </div>
+    </div>
+  </div>
 
-      <div class="form-group">
-        <label for="email">ইমেইল</label>
-        <input type="email" id="email" placeholder="আপনার ইমেইল" readonly>
-      </div>
+  <!-- Change Avatar Card -->
+  <div class="profile-card">
+    <div class="profile-section">
+      <h3 class="profile-section-title">প্রোফাইল ছবি</h3>
 
-      <div class="form-group">
-        <label for="bio">বায়ো</label>
-        <textarea id="bio" placeholder="সংক্ষিপ্ত বর্ণনা" rows="4"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>রোল</label>
-        <span id="user-role" class="role-badge"></span>
-      </div>
-
-      <div class="form-actions">
-        <button class="btn btn-primary" onclick="saveProfile()">সেভ করুন</button>
+      <div class="profile-avatar-section">
+        <div class="avatar-upload">
+          <img id="profile-avatar" src="" alt="Avatar" style="display:none">
+          <div id="avatar-placeholder" class="avatar-placeholder">
+            <span id="profile-initials"></span>
+          </div>
+          <input type="file" id="avatar-file" accept="image/*" onchange="handleAvatarSelect(event)">
+          <button class="btn btn-outline" onclick="document.getElementById('avatar-file').click()">
+            <i data-lucide="image" style="width: 16px; height: 16px;"></i>
+            ছবি আপলোড করুন
+          </button>
+          <p style="font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 0.5rem;">
+            JPG বা PNG ছবি, সর্বোচ্চ 2MB
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -115,17 +163,27 @@
     document.getElementById('display-name').value = user.displayName || '';
     document.getElementById('email').value = user.email || '';
     document.getElementById('bio').value = profile?.bio || '';
+    document.getElementById('profile-name-display').textContent = user.displayName || 'আপনার নাম';
+    document.getElementById('profile-email-display').textContent = user.email || '';
 
     const roleEl = document.getElementById('user-role');
     roleEl.textContent = getRoleLabel(profile?.role || 'user');
-    roleEl.className = `role-badge role-${profile?.role || 'user'}`;
+    roleEl.className = `profile-role-badge role-${profile?.role || 'user'}`;
+
+    document.getElementById('stat-articles').textContent = profile?.articleCount || '0';
+    document.getElementById('stat-views').textContent = formatNumber(profile?.totalViews || 0);
 
     if (profile?.photoURL) {
       document.getElementById('profile-avatar').src = profile.photoURL;
       document.getElementById('profile-avatar').style.display = 'block';
       document.getElementById('avatar-placeholder').style.display = 'none';
+      document.getElementById('profile-avatar-img').src = profile.photoURL;
+      document.getElementById('profile-avatar-img').style.display = 'block';
+      document.getElementById('profile-initials-large').style.display = 'none';
     } else {
-      document.getElementById('profile-initials').textContent = getInitials(user.displayName || user.email);
+      const initials = getInitials(user.displayName || user.email);
+      document.getElementById('profile-initials').textContent = initials;
+      document.getElementById('profile-initials-large').textContent = initials;
       document.getElementById('avatar-placeholder').style.display = 'flex';
       document.getElementById('profile-avatar').style.display = 'none';
     }
@@ -143,6 +201,9 @@
     try {
       await updateUserProfile(auth.currentUser.uid, { displayName, bio });
       showToast('প্রোফাইল আপডেট হয়েছে ✓');
+      const updated = await getUserProfile(auth.currentUser.uid);
+      currentUserProfile = updated;
+      loadProfile(auth.currentUser, updated);
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -157,7 +218,13 @@
       document.getElementById('profile-avatar').src = url;
       document.getElementById('profile-avatar').style.display = 'block';
       document.getElementById('avatar-placeholder').style.display = 'none';
+      document.getElementById('profile-avatar-img').src = url;
+      document.getElementById('profile-avatar-img').style.display = 'block';
+      document.getElementById('profile-initials-large').style.display = 'none';
       showToast('অ্যাভাটার আপডেট হয়েছে ✓');
+      const updated = await getUserProfile(auth.currentUser.uid);
+      currentUserProfile = updated;
+      loadProfile(auth.currentUser, updated);
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -171,6 +238,88 @@
     };
     return labels[role] || 'ব্যবহারকারী';
   }
+
+  // Theme Toggle
+  const themeToggle = document.getElementById('theme-toggle');
+  const root = document.documentElement;
+  
+  function initTheme() {
+    const savedTheme = localStorage.getItem('insightgrid-theme') || 'default';
+    root.classList.toggle('theme-glass', savedTheme === 'glass');
+    updateThemeIcon();
+  }
+
+  function updateThemeIcon() {
+    const icon = themeToggle.querySelector('i');
+    if (root.classList.contains('theme-glass')) {
+      icon.setAttribute('data-lucide', 'moon');
+    } else {
+      icon.setAttribute('data-lucide', 'sun');
+    }
+    lucide.createIcons();
+  }
+
+  themeToggle.addEventListener('click', () => {
+    root.classList.toggle('theme-glass');
+    const currentTheme = root.classList.contains('theme-glass') ? 'glass' : 'default';
+    localStorage.setItem('insightgrid-theme', currentTheme);
+    updateThemeIcon();
+    showToast(currentTheme === 'glass' ? '✨ Liquid Glass থিম সক্রিয়' : '🎨 ডিফল্ট থিম সক্রিয়');
+  });
+
+  initTheme();
+
+  // Search Functionality
+  const searchInput = document.getElementById('search-input');
+  const searchDropdown = document.getElementById('search-dropdown');
+  let searchTimeout;
+
+  searchInput.addEventListener('input', async (e) => {
+    const query = e.target.value.trim();
+    clearTimeout(searchTimeout);
+
+    if (query.length < 2) {
+      searchDropdown.classList.remove('active');
+      return;
+    }
+
+    searchTimeout = setTimeout(async () => {
+      try {
+        const results = await searchArticles(query);
+        displaySearchResults(results);
+      } catch (err) {
+        console.error('Search error:', err);
+        searchDropdown.innerHTML = '<div class="search-empty">সার্চ ব্যর্থ হয়েছে</div>';
+        searchDropdown.classList.add('active');
+      }
+    }, 300);
+  });
+
+  function displaySearchResults(results) {
+    if (!results || results.length === 0) {
+      searchDropdown.innerHTML = '<div class="search-empty">কিছু পাওয়া যায়নি</div>';
+      searchDropdown.classList.add('active');
+      return;
+    }
+
+    searchDropdown.innerHTML = results.slice(0, 5).map(article => `
+      <div class="search-result-item" onclick="navigateTo('article.html', {slug: '${article.slug}'})">
+        ${article.thumbnail ? `<img src="${article.thumbnail}" class="search-result-thumb" alt="">` : '<div class="search-result-thumb" style="background: var(--bg2);"></div>'}
+        <div class="search-result-content">
+          <div class="search-result-title">${article.title}</div>
+          <div class="search-result-type">${article.category}</div>
+        </div>
+      </div>
+    `).join('');
+    searchDropdown.classList.add('active');
+  }
+
+  // Close search on click outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-search')) {
+      searchDropdown.classList.remove('active');
+    }
+  });
 </script>
 <script>lucide.createIcons();</script>
 </body>

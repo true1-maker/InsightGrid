@@ -20,7 +20,17 @@
 <nav class="navbar">
   <div class="container">
     <a href="index.html" class="nav-brand"><i data-lucide="pen"></i> InsightGrid</a>
+
+    <div class="nav-search">
+      <span class="search-icon"><i data-lucide="search"></i></span>
+      <input type="text" id="search-input" placeholder="আর্টিকেল খুঁজুন...">
+      <div id="search-dropdown" class="search-dropdown"></div>
+    </div>
+
     <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle" aria-label="টিম টগল">
+        <i data-lucide="sun"></i>
+      </button>
       <a href="write.html" class="btn btn-outline btn-sm" id="nav-write-btn" style="display:none"><i data-lucide="edit"></i> লিখুন</a>
       <a href="login.html" class="btn btn-primary btn-sm" id="nav-login-btn">লগইন</a>
 
@@ -349,6 +359,91 @@
       </div>`;
     lucide.createIcons();
   }
+</script>
+
+<!-- Theme Toggle & Enhanced Search -->
+<script>
+  // Theme Toggle
+  const themeToggle = document.getElementById('theme-toggle');
+  const root = document.documentElement;
+  
+  function initTheme() {
+    const savedTheme = localStorage.getItem('insightgrid-theme') || 'default';
+    root.classList.toggle('theme-glass', savedTheme === 'glass');
+    updateThemeIcon();
+  }
+
+  function updateThemeIcon() {
+    const icon = themeToggle.querySelector('i');
+    if (root.classList.contains('theme-glass')) {
+      icon.setAttribute('data-lucide', 'moon');
+    } else {
+      icon.setAttribute('data-lucide', 'sun');
+    }
+    lucide.createIcons();
+  }
+
+  themeToggle.addEventListener('click', () => {
+    root.classList.toggle('theme-glass');
+    const currentTheme = root.classList.contains('theme-glass') ? 'glass' : 'default';
+    localStorage.setItem('insightgrid-theme', currentTheme);
+    updateThemeIcon();
+    showToast(currentTheme === 'glass' ? '✨ Liquid Glass থিম সক্রিয়' : '🎨 ডিফল্ট থিম সক্রিয়');
+  });
+
+  initTheme();
+
+  // Enhanced Search with Dropdown
+  const searchInput = document.getElementById('search-input');
+  const searchDropdown = document.getElementById('search-dropdown');
+  let searchTimeout;
+
+  searchInput.addEventListener('input', async (e) => {
+    const query = e.target.value.trim();
+    clearTimeout(searchTimeout);
+
+    if (query.length < 2) {
+      searchDropdown.classList.remove('active');
+      return;
+    }
+
+    searchTimeout = setTimeout(async () => {
+      try {
+        const results = await searchArticles(query);
+        displaySearchResults(results);
+      } catch (err) {
+        console.error('Search error:', err);
+        searchDropdown.innerHTML = '<div class="search-empty">সার্চ ব্যর্থ হয়েছে</div>';
+        searchDropdown.classList.add('active');
+      }
+    }, 300);
+  });
+
+  function displaySearchResults(results) {
+    if (!results || results.length === 0) {
+      searchDropdown.innerHTML = '<div class="search-empty">কিছু পাওয়া যায়নি</div>';
+      searchDropdown.classList.add('active');
+      return;
+    }
+
+    searchDropdown.innerHTML = results.slice(0, 5).map(article => `
+      <div class="search-result-item" onclick="navigateTo('article.html', {slug: '${article.slug}'})">
+        ${article.thumbnail ? `<img src="${article.thumbnail}" class="search-result-thumb" alt="">` : '<div class="search-result-thumb" style="background: var(--bg2);"></div>'}
+        <div class="search-result-content">
+          <div class="search-result-title">${article.title}</div>
+          <div class="search-result-type">${article.category}</div>
+        </div>
+      </div>
+    `).join('');
+    searchDropdown.classList.add('active');
+  }
+
+  // Close search dropdown on click outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-search')) {
+      searchDropdown.classList.remove('active');
+    }
+  });
 </script>
 <script>lucide.createIcons();</script>
 </body>
