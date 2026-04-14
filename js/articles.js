@@ -17,7 +17,7 @@ async function createArticle(data) {
   console.log('Current User Profile:', currentUserProfile);
 
   // Check role permission
-  if (!currentUserProfile || (currentUserProfile.role !== 'admin' && user.uid !== ADMIN_UID)) {
+  if (user.uid !== ADMIN_UID && (!currentUserProfile || currentUserProfile.role !== 'admin')) {
     console.error('Permission denied - Role:', currentUserProfile?.role, 'UID:', user.uid);
     throw new Error('পোস্ট তৈরি করার অনুমতি নেই');
   }
