@@ -13,6 +13,11 @@ async function createArticle(data) {
   const user = auth.currentUser;
   if (!user) throw new Error('লগইন প্রয়োজন');
 
+  // Check role permission
+  if (!currentUserProfile || currentUserProfile.role !== 'admin') {
+    throw new Error('পোস্ট তৈরি করার অনুমতি নেই');
+  }
+
   const article = {
     title:        data.title.trim(),
     slug:         slugify(data.title),
@@ -49,6 +54,11 @@ async function updateArticle(articleId, data) {
   const user = auth.currentUser;
   if (!user) throw new Error('লগইন প্রয়োজন');
 
+  // Check role permission - only admins can edit
+  if (!currentUserProfile || currentUserProfile.role !== 'admin') {
+    throw new Error('আর্টিকেল সম্পাদনা করার অনুমতি নেই');
+  }
+
   const payload = { ...data, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
   if (data.content) payload.readTime = estimateReadTime(data.content);
 
@@ -71,7 +81,7 @@ async function deleteArticle(articleId) {
   const article  = snap.data();
   const isAdmin  = currentUserProfile?.role === 'admin';
 
-  if (article.authorId !== user.uid && !isAdmin)
+  if (!isAdmin)
     throw new Error('এই আর্টিকেল মুছতে আপনার অনুমতি নেই');
 
   await db.collection('articles').doc(articleId).delete();

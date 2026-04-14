@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>প্রোফাইল – InsightGrid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+<!-- ════════════════ NAVBAR ════════════════ -->
+<nav class="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-brand"><i data-lucide="pen"></i> InsightGrid</a>
+    <div class="nav-actions">
+      <a href="write.html" class="btn btn-primary btn-sm" id="nav-write-btn" style="display:none"><i data-lucide="edit"></i> নতুন পোস্ট</a>
+      <a href="login.html" class="btn btn-primary btn-sm" id="nav-login-btn">লগইন</a>
+
+      <div class="dropdown" id="nav-user-menu" style="display:none">
+        <div class="nav-avatar" onclick="toggleDropdown('user-dd')">
+          <img id="nav-avatar" src="" alt="" style="display:none">
+          <span id="nav-initials"></span>
+        </div>
+        <div class="dropdown-menu" id="user-dd">
+          <a href="dashboard.html"><i data-lucide="bar-chart-3"></i> ড্যাশবোর্ড</a>
+          <a href="write.html"><i data-lucide="edit"></i> নতুন পোস্ট</a>
+          <a href="profile.html"><i data-lucide="user"></i> প্রোফাইল</a>
+          <div class="dropdown-divider"></div>
+          <button onclick="handleLogout()"><i data-lucide="log-out"></i> লগআউট</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════ PROFILE BODY ════════════════ -->
+<div class="container profile-page">
+
+  <!-- Page header -->
+  <h1 class="page-title">প্রোফাইল</h1>
+  <p class="page-sub">আপনার প্রোফাইল তথ্য পরিবর্তন করুন</p>
+
+  <!-- Profile form -->
+  <div class="profile-form">
+    <div class="profile-avatar-section">
+      <div class="avatar-upload">
+        <img id="profile-avatar" src="" alt="Avatar" style="display:none">
+        <div id="avatar-placeholder" class="avatar-placeholder">
+          <span id="profile-initials"></span>
+        </div>
+        <input type="file" id="avatar-file" accept="image/*" onchange="handleAvatarSelect(event)">
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('avatar-file').click()">ছবি পরিবর্তন</button>
+      </div>
+    </div>
+
+    <div class="profile-fields">
+      <div class="form-group">
+        <label for="display-name">নাম</label>
+        <input type="text" id="display-name" placeholder="আপনার নাম">
+      </div>
+
+      <div class="form-group">
+        <label for="email">ইমেইল</label>
+        <input type="email" id="email" placeholder="আপনার ইমেইল" readonly>
+      </div>
+
+      <div class="form-group">
+        <label for="bio">বায়ো</label>
+        <textarea id="bio" placeholder="সংক্ষিপ্ত বর্ণনা" rows="4"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>রোল</label>
+        <span id="user-role" class="role-badge"></span>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="saveProfile()">সেভ করুন</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════ FOOTER ════════════════ -->
+<footer class="footer" style="margin-top:4rem">
+  <div class="container">
+    <div class="footer-bottom">© 2024 InsightGrid – সর্বস্বত্ব সংরক্ষিত</div>
+  </div>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/auth.js"></script>
+
+<script>
+  requireAuth();
+
+  initAuth(async (user, profile) => {
+    loadProfile(user, profile);
+  });
+
+  async function loadProfile(user, profile) {
+    document.getElementById('display-name').value = user.displayName || '';
+    document.getElementById('email').value = user.email || '';
+    document.getElementById('bio').value = profile?.bio || '';
+
+    const roleEl = document.getElementById('user-role');
+    roleEl.textContent = getRoleLabel(profile?.role || 'user');
+    roleEl.className = `role-badge role-${profile?.role || 'user'}`;
+
+    if (profile?.photoURL) {
+      document.getElementById('profile-avatar').src = profile.photoURL;
+      document.getElementById('profile-avatar').style.display = 'block';
+      document.getElementById('avatar-placeholder').style.display = 'none';
+    } else {
+      document.getElementById('profile-initials').textContent = getInitials(user.displayName || user.email);
+      document.getElementById('avatar-placeholder').style.display = 'flex';
+      document.getElementById('profile-avatar').style.display = 'none';
+    }
+  }
+
+  async function saveProfile() {
+    const displayName = document.getElementById('display-name').value.trim();
+    const bio = document.getElementById('bio').value.trim();
+
+    if (!displayName) {
+      showToast('নাম প্রয়োজন', 'error');
+      return;
+    }
+
+    try {
+      await updateUserProfile(auth.currentUser.uid, { displayName, bio });
+      showToast('প্রোফাইল আপডেট হয়েছে ✓');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  async function handleAvatarSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      const url = await uploadProfilePhoto(file);
+      document.getElementById('profile-avatar').src = url;
+      document.getElementById('profile-avatar').style.display = 'block';
+      document.getElementById('avatar-placeholder').style.display = 'none';
+      showToast('অ্যাভাটার আপডেট হয়েছে ✓');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  function getRoleLabel(role) {
+    const labels = {
+      admin: 'অ্যাডমিন',
+      editor: 'সম্পাদক',
+      user: 'ব্যবহারকারী'
+    };
+    return labels[role] || 'ব্যবহারকারী';
+  }
+</script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

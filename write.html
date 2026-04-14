@@ -117,7 +117,14 @@
   requireAuth();
 
   // ── Init auth + check for edit mode ──────
-  initAuth(async (user) => {
+  initAuth(async (user, profile) => {
+    // Check permission
+    if (!profile || profile.role !== 'admin') {
+      showToast('পোস্ট তৈরি করার অনুমতি নেই', 'error');
+      setTimeout(() => window.location.href = 'index.html', 2000);
+      return;
+    }
+
     buildCategoryOptions('cat-select');
 
     const id = getQueryParam('id');

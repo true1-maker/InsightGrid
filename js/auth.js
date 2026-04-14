@@ -17,7 +17,7 @@ async function registerUser(email, password, displayName) {
     email,
     photoURL:     '',
     bio:          '',
-    role:         'author',
+    role:         'user',
     articleCount: 0,
     totalViews:   0,
     bookmarks:    [],
@@ -58,7 +58,7 @@ async function loginWithGoogle() {
       email:        user.email,
       photoURL:     user.photoURL || '',
       bio:          '',
-      role:         'author',
+      role:         'user',
       articleCount: 0,
       totalViews:   0,
       bookmarks:    [],
@@ -158,7 +158,10 @@ function updateNavbarUI(user, profile) {
 
   if (user) {
     if (loginBtn) loginBtn.style.display = 'none';
-    if (writeBtn) writeBtn.style.display = 'inline-flex';
+    if (writeBtn) {
+      const canWrite = profile?.role === 'admin';
+      writeBtn.style.display = canWrite ? 'inline-flex' : 'none';
+    }
     if (userMenu) userMenu.style.display = 'block';
 
     if (profile?.photoURL && avatarImg) {
