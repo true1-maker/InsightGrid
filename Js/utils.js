@@ -127,7 +127,7 @@ function copyToClipboard(text) {
     .catch(() => showToast('কপি ব্যর্থ হয়েছে', 'error'));
  }
   
-export async function uploadImage(file) {
+async function uploadImage(file) {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", "blog_upload");
