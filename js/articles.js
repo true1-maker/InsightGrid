@@ -22,7 +22,7 @@ async function createArticle(data) {
   console.log('==========================================');
 
   // Check role permission
-  const isAdmin = currentUserProfile?.role === 'admin' || user.uid === ADMIN_UID;
+  const isAdmin = (currentUserProfile && currentUserProfile.role === 'admin') || user.uid === ADMIN_UID;
   if (!isAdmin) {
     console.error('❌ PERMISSION DENIED');
     console.error('   - Profile role:', currentUserProfile?.role);
@@ -76,7 +76,7 @@ async function updateArticle(articleId, data) {
   if (!user) throw new Error('লগইন প্রয়োজন');
 
   // Check role permission - only admins can edit
-  const isAdmin = currentUserProfile?.role === 'admin' || user.uid === ADMIN_UID;
+  const isAdmin = (currentUserProfile && currentUserProfile.role === 'admin') || user.uid === ADMIN_UID;
   if (!isAdmin) {
     console.error('❌ UPDATE ARTICLE PERMISSION DENIED');
     console.error('   User UID:', user.uid.slice(-8));
@@ -114,7 +114,7 @@ async function deleteArticle(articleId) {
   if (!snap.exists) throw new Error('আর্টিকেল পাওয়া যায়নি');
 
   const article  = snap.data();
-  const isAdmin  = currentUserProfile?.role === 'admin' || user.uid === ADMIN_UID;
+  const isAdmin  = (currentUserProfile && currentUserProfile.role === 'admin') || user.uid === ADMIN_UID;
 
   if (!isAdmin) {
     console.error('❌ DELETE ARTICLE PERMISSION DENIED');
@@ -399,4 +399,4 @@ function renderComment(c, currentUid) {
 
 // Make getArticles globally accessible
 window.getArticles = getArticles;
-      
+window.createArticle = createArticle;
