@@ -402,3 +402,4 @@ window.getArticles = getArticles;
 window.searchArticles = searchArticles;
 window.getArticleById = getArticleById;
 window.getArticleBySlug = getArticleBySlug;
+window.renderComment = renderComment;
