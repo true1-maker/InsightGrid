@@ -65,7 +65,6 @@ async function createArticle(data) {
     console.error('   Error Code:', firestoreErr.code);
     throw new Error('❌ আর্টিকেল তৈরি ব্যর্থ: ' + firestoreErr.message);
   }
-  }
 }
 
 // ════════════════════════════════════════════════════════════
@@ -400,3 +399,4 @@ function renderComment(c, currentUid) {
 // Make getArticles globally accessible
 window.createArticle = createArticle;
 window.getArticles = getArticles;
+window.searchArticles = searchArticles;
