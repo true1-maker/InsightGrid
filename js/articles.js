@@ -398,5 +398,5 @@ function renderComment(c, currentUid) {
       }
 
 // Make getArticles globally accessible
-window.getArticles = getArticles;
 window.createArticle = createArticle;
+window.getArticles = getArticles;
