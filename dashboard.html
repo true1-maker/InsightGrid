@@ -208,7 +208,7 @@
 
     const viewBtn = a.status === 'published'
       ? `<button class="icon-btn" title="দেখুন"
-           onclick="navigateTo('article.html',{slug:'${a.slug}'})">👁</button>`
+           onclick="navigateToArticle({slug:'${a.slug}', id:'${a.id}'})">👁</button>`
       : '';
 
     return `
@@ -319,7 +319,7 @@
     }
 
     searchDropdown.innerHTML = results.slice(0, 5).map(article => `
-      <div class="search-result-item" onclick="navigateTo('article.html', {slug: '${article.slug}'})">
+      <div class="search-result-item" onclick="navigateToArticle({slug: '${article.slug}', id: '${article.id}'})">
         ${article.thumbnail ? `<img src="${article.thumbnail}" class="search-result-thumb" alt="">` : '<div class="search-result-thumb" style="background: var(--bg2);"></div>'}
         <div class="search-result-content">
           <div class="search-result-title">${article.title}</div>

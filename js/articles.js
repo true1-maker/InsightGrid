@@ -348,7 +348,7 @@ function renderArticleCard(a) {
     .map(t => `<span class="tag">${t}</span>`).join('');
 
   return `
-  <article class="article-card" onclick="navigateTo('article.html',{slug:'${a.slug}'})">
+  <article class="article-card" onclick="navigateToArticle({slug:'${a.slug}', id:'${a.id}'})">
     <div class="card-body">
       <div class="card-meta">
         <div class="avatar-xs">

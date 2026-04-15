@@ -91,9 +91,10 @@
     }
 
     try {
-      articleData = id
-        ? await getArticleById(id)
-        : await getArticleBySlug(slug);
+      articleData = id ? await getArticleById(id) : null;
+      if (!articleData && slug) {
+        articleData = await getArticleBySlug(slug);
+      }
       if (!articleData) { showNotFound(); return; }
 
       // Update page meta
@@ -431,7 +432,7 @@
     }
 
     searchDropdown.innerHTML = results.slice(0, 5).map(article => `
-      <div class="search-result-item" onclick="navigateTo('article.html', {slug: '${article.slug}'})">
+      <div class="search-result-item" onclick="navigateToArticle({slug: '${article.slug}', id: '${article.id}'})">
         ${article.thumbnail ? `<img src="${article.thumbnail}" class="search-result-thumb" alt="">` : '<div class="search-result-thumb" style="background: var(--bg2);"></div>'}
         <div class="search-result-content">
           <div class="search-result-title">${article.title}</div>

@@ -66,6 +66,14 @@ function navigateTo(page, params = {}) {
   window.location.href = qs ? `${page}?${qs}` : page;
 }
 
+function navigateToArticle(article) {
+  if (!article) return;
+  const params = {};
+  if (article.slug) params.slug = article.slug;
+  if (article.id) params.id = article.id;
+  navigateTo('article.html', params);
+}
+
 // ── Toast Notification ───────────────────────────────────────
 function showToast(message, type = 'success') {
   let el = document.getElementById('toast');
