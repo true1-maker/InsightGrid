@@ -35,7 +35,7 @@ async function createArticle(data) {
 
   const article = {
     title:        data.title.trim(),
-    slug:         slugify(data.title),
+    slug:         `${slugify(data.title)}-${Date.now()}`,
     content:      data.content,
     thumbnail:    data.thumbnail || '',
     authorId:     user.uid,
@@ -348,7 +348,7 @@ function renderArticleCard(a) {
     .map(t => `<span class="tag">${t}</span>`).join('');
 
   return `
-  <article class="article-card" onclick="navigateTo('article.html',{id:'${a.id}'})">
+  <article class="article-card" onclick="navigateTo('article.html',{slug:'${a.slug}'})">
     <div class="card-body">
       <div class="card-meta">
         <div class="avatar-xs">

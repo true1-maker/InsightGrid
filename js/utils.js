@@ -9,8 +9,7 @@ function slugify(text) {
     .replace(/\s+/g, '-')
     .replace(/[^\w\u0980-\u09FF\-]+/g, '')
     .replace(/--+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    + '-' + Date.now();
+    .replace(/^-+|-+$/g, '');
 }
 
 // ── Date Formatters ──────────────────────────────────────────

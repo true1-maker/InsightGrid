@@ -82,15 +82,18 @@
   // ── Load article ─────────────────────────
   (async () => {
     const id = getQueryParam('id');
-    console.log('Article ID:', id);
+    const slug = getQueryParam('slug');
+    console.log('Article ID:', id, 'slug:', slug);
 
-    if (!id) {
+    if (!id && !slug) {
       showNotFound();
       return;
     }
 
     try {
-      articleData = await getArticleById(id);
+      articleData = id
+        ? await getArticleById(id)
+        : await getArticleBySlug(slug);
       if (!articleData) { showNotFound(); return; }
 
       // Update page meta
@@ -428,7 +431,7 @@
     }
 
     searchDropdown.innerHTML = results.slice(0, 5).map(article => `
-      <div class="search-result-item" onclick="navigateTo('article.html', {id: '${article.id}'})">
+      <div class="search-result-item" onclick="navigateTo('article.html', {slug: '${article.slug}'})">
         ${article.thumbnail ? `<img src="${article.thumbnail}" class="search-result-thumb" alt="">` : '<div class="search-result-thumb" style="background: var(--bg2);"></div>'}
         <div class="search-result-content">
           <div class="search-result-title">${article.title}</div>

@@ -294,7 +294,7 @@
 
         if (data.status === 'published') {
           const updated = await getArticleById(editingId);
-          if (updated) setTimeout(() => navigateTo('article.html', { id: updated.id }), 900);
+          if (updated) setTimeout(() => navigateTo('article.html', { slug: updated.slug }), 900);
         }
       } else {
         const result = await createArticle(data);
@@ -303,7 +303,7 @@
         showToast(data.status === 'published' ? '🎉 আর্টিকেল প্রকাশিত হয়েছে!' : 'ড্রাফট সেভ হয়েছে ✓');
 
         if (data.status === 'published') {
-          setTimeout(() => navigateTo('article.html', { id: result.id }), 900);
+          setTimeout(() => navigateTo('article.html', { slug: result.slug }), 900);
         } else {
           // Update URL to edit mode without reload
           history.replaceState(null, '', `write.html?id=${result.id}`);
